@@ -18,13 +18,16 @@ movable_pieces(b, [
 			[ s, m, l ]
 		  ]).
 
-board(	[
-	 [ [e, e, e], [e, e, e], [e, e, e] ],
-	 [ [e, e, e], [e, e, e], [e, e, e] ],
-	 [ [e, e, e], [e, e, e], [e, e, e] ]
-	]).
+board( [
+    	 [ [e, e, e], [e, e, e], [e, e, e] ],
+    	 [ [e, e, e], [e, e, e], [e, e, e] ],
+    	 [ [e, e, e], [e, e, e], [e, e, e] ]
+	     ]).
 
-game_cicle:- write('Hello darkness'), nl, board(B), repeat, display_board(B), sleep(1), fail.
+game_cicle:- write('Hello darkness'), nl, board(B), !,
+  repeat, display_board(B),
+  %%input,
+  !.
 
 draw_piece( (T, C), B ):-
 	player(C), C = r,
@@ -36,19 +39,20 @@ draw_piece( (T, C), B ):-
 	member( (T, C), B ),
 	write('&').
 
-draw_piece( (_, _), _ ):- write(' ').
-
+draw_piece( _, _ ):- write(' ').
 
 display_board(B):- write('     a       b       c'), nl,
-	dB(1, B).
+	dB(1, B), !, sleep(1), fail.
 
 dB(N, [H|T]):-
+  N =< 3,
   write('  -----------------------'), nl,
 	display_line(N, 1, H),
 	N1 is N + 1,
 	dB(N1, T).
+
 dB(_,[]):-
-	write('  -----------------------'), nl.
+  write('  -----------------------'), nl.
 
 display_line(L, N, B):-
 	N = 3,
@@ -58,13 +62,12 @@ display_line(L, N, B):-
 	display_line(L, N1, B).
 
 display_line(L, N, B):-
+  N < 6,
 	N1 is N+1,
-	N1 < 7,
 	dL(N, B), nl,
 	display_line(L, N1, B).
 
-
-display_line(_, _, _):- write('').
+display_line(_, _, _).
 
 dL(N, _):- N > 5, nl.
 
