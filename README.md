@@ -4,7 +4,7 @@
 
   1 - Desenhar estado do jogo
   
-      (DONE)
+      DONE
       
   2 - Fazer ciclo de jogo
   
