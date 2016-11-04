@@ -7,10 +7,13 @@
       DONE
       
   2 - Fazer ciclo de jogo
+      
+      DONE
   
   3 - Adicionar inputs do jogador a cada ciclo
   
       Dependência: 2
+      DONE
       
   4 - Adicionar função que mete uma dada peça numa dada posição do tabuleiro
   
