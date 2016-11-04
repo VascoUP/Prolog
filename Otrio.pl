@@ -1,32 +1,30 @@
 player(r).
 player(b).
 
-state(win).
-state(lost).
-state(rTurn).
-state(bTurn).
-state(gTurn).
-state(yTurn).
-
-movable_pieces(r, [ 
-			[ s, m, l ], 
-			[ s, m, l ], 
-			[ s, m, l ] 
+movable_pieces(r, [
+			[ s, m, l ],
+			[ s, m, l ],
+			[ s, m, l ],
+			[ s, m, l ],
+			[ s, m, l ],
+			[ s, m, l ]
 		  ]).
-movable_pieces(b, [ 
-			[ s, m, l ], 
-			[ s, m, l ], 
-			[ s, m, l ] 
-		  ]).	
+movable_pieces(b, [
+			[ s, m, l ],
+			[ s, m, l ],
+			[ s, m, l ],
+			[ s, m, l ],
+			[ s, m, l ],
+			[ s, m, l ]
+		  ]).
 
 board(	[
-	 [ [e, (m,r), e], [e, e, e], [(s,b), e, e] ], 
-	 [ [e, e, (l,r)], [e, (m,r), (l,b)], [e, e, e] ], 
-	 [ [e, e, e], [(s,b), e, (l,b)], [(s,r), (m,r), e] ]
+	 [ [e, e, e], [e, e, e], [e, e, e] ],
+	 [ [e, e, e], [e, e, e], [e, e, e] ],
+	 [ [e, e, e], [e, e, e], [e, e, e] ]
 	]).
 
-game:- board(B), display_board(B).
-
+game_cicle:- write('Hello darkness'), nl, board(B), repeat, display_board(B), sleep(1), fail.
 
 draw_piece( (T, C), B ):-
 	player(C), C = r,
@@ -45,8 +43,7 @@ display_board(B):- write('     a       b       c'), nl,
 	dB(1, B).
 
 dB(N, [H|T]):-
-	write('  -----------------------'), nl,
-	%%write(N),
+  write('  -----------------------'), nl,
 	display_line(N, 1, H),
 	N1 is N + 1,
 	dB(N1, T).
@@ -62,7 +59,7 @@ display_line(L, N, B):-
 
 display_line(L, N, B):-
 	N1 is N+1,
-	N1 < 7, 
+	N1 < 7,
 	dL(N, B), nl,
 	display_line(L, N1, B).
 
