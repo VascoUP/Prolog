@@ -26,8 +26,18 @@ board( [
 
 game_cicle:- write('Hello darkness'), nl, board(B), !,
   repeat, display_board(B),
-  %%input,
-  !.
+  ask_piece(P), ask_coords(C, L),
+  write('Piece '), write(P), write(' to '), write(C), write(' - '), write(L), nl,
+  fail, !.
+
+ask_piece(P):-
+  ask_input('Piece: ', P), nl.
+
+ask_coords(C, L):-
+  ask_input('Column: ', C), nl,
+  ask_input('Line: ', L), nl.
+
+ask_input(X, Y):- write(X), nl, read(Y), !.
 
 draw_piece( (T, C), B ):-
 	player(C), C = r,
@@ -42,7 +52,7 @@ draw_piece( (T, C), B ):-
 draw_piece( _, _ ):- write(' ').
 
 display_board(B):- write('     a       b       c'), nl,
-	dB(1, B), !, sleep(1), fail.
+	dB(1, B), !.
 
 dB(N, [H|T]):-
   N =< 3,
