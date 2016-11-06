@@ -20,7 +20,7 @@ movable_pieces(b, [
 
 board( [
     	 [ [e, e, e], [e, e, e], [e, e, e] ],
-    	 [ [e, e, e], [e, e, e], [e, e, e] ],
+    	 [ [e, e, (l, r)], [e, e, e], [e, e, e] ],
     	 [ [e, e, e], [e, e, e], [e, e, e] ]
 	     ]).
 
@@ -28,6 +28,7 @@ game_cicle:- write('Hello darkness'), nl, board(B), !,
   repeat, display_board(B),
   ask_piece(P), ask_coords(C, L),
   write('Piece '), write(P), write(' to '), write(C), write(' - '), write(L), nl,
+	write('Replace'), nl, replace_board(B, L, C, P, X), nl, write('B2'), nl, nl, display_board(X),
   fail, !.
 
 ask_piece(P):-
@@ -206,3 +207,30 @@ dL(N, [_|T]):-
 	dL(5, T).
 
 dL(_, []):- write(' |').
+
+
+replace_board([H|T], 0, C, P, [R|T]):- !, replace_line(H, C, P, R).
+
+replace_board([H|T], L, C, P, [H|R]):- L > -1, L1 is L-1, replace_board(T, L1, C, P, R), !.
+
+replace_board(L, _, _, _, _, L).
+
+
+replace_line([H|T], 0, P, [R|T]):- P = (l, _), replace(H, 2, P, R).
+
+replace_line([H|T], 0, P, [R|T]):- P = (m, _), replace(H, 1, P, R).
+
+replace_line([H|T], 0, P, [R|T]):- P = (s, _), replace(H, 0, P, R).
+
+replace_line([H|T], C, P, [H|R]):- C > -1, C1 is C - 1, replace_line(T, C1, P, R), !.
+
+replace_line(L, _, _, _, L).
+
+
+replace([P|T], 0, P, [_|T]).
+
+replace([_|T], 0, P, [P|T]).
+
+replace([H|T], I, P, [H|R]):- I > -1, NI is I-1, replace(T, NI, P, R), !.
+
+replace(L, _, _, L).
