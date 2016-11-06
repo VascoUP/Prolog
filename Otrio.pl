@@ -2,20 +2,14 @@ player(r).
 player(b).
 
 movable_pieces(r, [
-			[ s, m, l ],
-			[ s, m, l ],
-			[ s, m, l ],
-			[ s, m, l ],
-			[ s, m, l ],
-			[ s, m, l ]
+			(3, s),
+			(3, m),
+			(3, l)
 		  ]).
 movable_pieces(b, [
-			[ s, m, l ],
-			[ s, m, l ],
-			[ s, m, l ],
-			[ s, m, l ],
-			[ s, m, l ],
-			[ s, m, l ]
+			(3, s),
+			(3, m),
+			(3, l)
 		  ]).
 
 board( [
