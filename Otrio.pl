@@ -1,6 +1,8 @@
 player(r).
 player(b).
 
+pieces( [s, m, l] ).
+
 movable_pieces(r, [
 			(3, s),
 			(3, m),
@@ -18,20 +20,34 @@ board( [
     	 [ [e, e, e], [e, e, e], [e, e, e] ]
 	     ]).
 
-game_cicle:- board(B), !,
-  cicle(B).
+game_cicle:- board(Brd), player(Plr), !,
+  cicle(Brd, Plr).
 
-cicle(B):- display_board(B),
+cicle(Brd, Plr):- display_board(Brd),
 	ask_piece(P), ask_coords(C, L),
-	replace_board(B, L, C, P, B2),
-	!, cicle(B2).
+	verify_piece_to_player(P, Plr, Pair),
+	replace_board(Brd, L, C, Pair, Brd2),
+	next_player(Plr, Plr2),
+	!, cicle(Brd2, Plr2).
+
+next_player(Player1, NextPlayer):-
+	player(NextPlayer),
+	NextPlayer \= Player1, !.
+
+verify_piece_to_player(Piece, Player, Pair):-
+	player(Player), piece_to_player(Piece, Player, Pair).
+
+piece_to_player(Piece, Player, (Piece, Player)).
 
 ask_piece(P):-
-  ask_input('Piece: ', P), nl.
+  pieces(Ps), repeat,
+	ask_input('Piece: ', P), member(P, Ps), nl.
 
 ask_coords(C, L):-
-  ask_input('Column: ', C), nl,
-  ask_input('Line: ', L), nl.
+  repeat,
+	ask_input('Column: ', C), C > -1, C < 3, nl,
+	repeat,
+  ask_input('Line: ', L), L > -1, L < 3, nl.
 
 ask_input(X, Y):- write(X), nl, read(Y), !.
 
