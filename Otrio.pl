@@ -20,8 +20,9 @@ board( [
     	 [ [e, e, e], [e, e, e], [e, e, e] ]
 	     ]).
 
-game_cicle:- board(Brd), player(Plr), get_movable_pieces(Plr, Mv1, Mv2), !,
-	write(Mv1), nl, write(Mv2), nl,
+game_cicle:-
+	board(Brd), player(Plr),
+	get_movable_pieces(Plr, Mv1, Mv2), !,
   cicle(Brd, Plr, Mv1, Mv2).
 
 get_movable_pieces(Plr1, Mv1, Mv2):-
@@ -79,10 +80,10 @@ draw_piece( (T, C), B ):-
 draw_piece( _, _ ):- write(' ').
 
 display_board(B):- write('     a       b       c'), nl,
-	dB(1, B), !.
+	dB(1, B).
 
 dB(N, [H|T]):-
-  N =< 3,
+  N =< 3, !,
   write('  -----------------------'), nl,
 	display_line(N, 1, H),
 	N1 is N + 1,
@@ -92,14 +93,14 @@ dB(_,[]):-
   write('  -----------------------'), nl.
 
 display_line(L, N, B):-
-	N = 3,
+	N = 3, !,
 	N1 is N+1,
 	write(L),
 	dL(N, B), nl,
 	display_line(L, N1, B).
 
 display_line(L, N, B):-
-  N < 6,
+  N < 6, !,
 	N1 is N+1,
 	dL(N, B), nl,
 	display_line(L, N1, B).
@@ -111,7 +112,7 @@ dL(N, _):- N > 5, nl.
 %% draw large at n = 1
 dL(N, [H|T]):-
 	N = 1,
-	member( (l, _), H ),
+	member( (l, _), H ), !,
 
 	write(' |  /'),
 	draw_piece( (l, _), H),
@@ -121,7 +122,7 @@ dL(N, [H|T]):-
 
 %% draw empty at n = 1
 dL(N, [_|T]):-
-	N = 1,
+	N = 1, !,
 
 	write(' |      '),
 
@@ -130,7 +131,7 @@ dL(N, [_|T]):-
 %% draw large and medium at n = 2
 dL(N, [H|T]):-
 	N = 2,
-	member( (l, _), H ),
+	member( (l, _), H ), !,
 
 	write(' | / '),
 	draw_piece( (m, _), H),
@@ -140,7 +141,7 @@ dL(N, [H|T]):-
 
 %% draw medium at n = 2
 dL(N, [H|T]):-
-	N = 2,
+	N = 2, !,
 
 	write(' |   '),
 	draw_piece( (m, _), H),
@@ -152,7 +153,7 @@ dL(N, [H|T]):-
 %% draw empty space at n = 2
 dL(N, [H|T]):-
 	N = 2,
-	member( (m, _), H ),
+	member( (m, _), H ), !,
 
 	write(' |   '),
 	draw_piece( (m, _), H),
@@ -163,7 +164,7 @@ dL(N, [H|T]):-
 %% draw large, medium and small at n = 3
 dL(N, [H|T]):-
 	N = 3,
-	T \= [],
+	T \= [], !,
 	write('| '),
 
 	draw_piece( (l, _), H ),
@@ -178,7 +179,7 @@ dL(N, [H|T]):-
 
 %% draw large, medium and small at n = 3
 dL(N, [H|T]):-
-	N = 3,
+	N = 3, !,
 	write('| '),
 
 	draw_piece( (l, _), H ),
@@ -194,7 +195,7 @@ dL(N, [H|T]):-
 %% draw large and medium at n = 4
 dL(N, [H|T]):-
 	N = 4,
-	member( (l, _), H ),
+	member( (l, _), H ), !,
 
 	write(' | \\ '),
 	draw_piece( (m, _), H),
@@ -204,7 +205,7 @@ dL(N, [H|T]):-
 
 %% draw medium at n = 4
 dL(N, [H|T]):-
-	N = 4,
+	N = 4, !,
 
 	write(' |   '),
 	draw_piece( (m, _), H),
@@ -216,7 +217,7 @@ dL(N, [H|T]):-
 %% draw large at n = 5
 dL(N, [H|T]):-
 	N = 5,
-	member( (l, _), H ),
+	member( (l, _), H ), !,
 
 	write(' |  \\'),
 	draw_piece( (l, _), H),
@@ -226,7 +227,7 @@ dL(N, [H|T]):-
 
 %% draw empty at n = 5
 dL(N, [_|T]):-
-	N = 5,
+	N = 5, !,
 
 	write(' |      '),
 
