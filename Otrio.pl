@@ -18,12 +18,13 @@ board( [
     	 [ [e, e, e], [e, e, e], [e, e, e] ]
 	     ]).
 
-game_cicle:- write('Hello darkness'), nl, board(B), !,
-  repeat, display_board(B),
-  ask_piece(P), ask_coords(C, L),
-  write('Piece '), write(P), write(' to '), write(C), write(' - '), write(L), nl,
-	write('Replace'), nl, replace_board(B, L, C, P, X), nl, write('B2'), nl, nl, display_board(X),
-  fail, !.
+game_cicle:- board(B), !,
+  cicle(B).
+
+cicle(B):- display_board(B),
+	ask_piece(P), ask_coords(C, L),
+	replace_board(B, L, C, P, B2),
+	!, cicle(B2).
 
 ask_piece(P):-
   ask_input('Piece: ', P), nl.
