@@ -20,15 +20,15 @@ board( [
     	 [ [e, e, e], [e, e, e], [e, e, e] ]
 	     ]).
 
+
+%%-----------
+%% FUNCTIONS
+%%-----------
+
 game_cicle:-
 	board(Brd), player(Plr),
 	get_movable_pieces(Plr, Mv1, Mv2), !,
   cicle(Brd, Plr, Mv1, Mv2).
-
-get_movable_pieces(Plr1, Mv1, Mv2):-
-	movable_pieces(Plr1, Mv1),
-	next_player(Plr1, Plr2),
-	movable_pieces(Plr2, Mv2).
 
 %% Mv1 are the available pieces of the current player
 %% Mv2 are the available pieces of the other player
@@ -40,11 +40,31 @@ cicle(Brd, Plr, Mv1, Mv2):-
 	nl, write('----------------------'),
 	nl,
 
-	ask_piece(P), ask_coords(C, L),
+	ask_piece(P), !, ask_coords(C, L), !,
 	verify_piece_to_player(P, Plr, Pair),
-	replace_board(Brd, L, C, Pair, Brd2),
+	next_cicle(P, Brd, L, C, Pair, Brd2, Plr, Plr2, Mv1, Mv2, NextMv1, NextMv2),
+	!, cicle(Brd2, Plr2, NextMv1, NextMv2).
+
+
+%%--------------------
+%% HANDLE GAME CICLES
+%%--------------------
+
+next_mv(Mv1, Mv1).
+
+next_cicle(P, Brd, L, C, Pair, Brd2, Plr, Plr2, Mv1, Mv2, NextMv1, NextMv2):-
+	replace_board(Brd, L, C, Pair, Brd2), !, remove_piece(Mv1, P, NextMv2), !,
+
 	next_player(Plr, Plr2),
-	!, cicle(Brd2, Plr2, Mv2, Mv1).
+	next_mv(Mv2, NextMv1).
+
+next_cicle(_, Brd, _, _, _, Brd, Plr, Plr, Mv1, Mv2, NextMv1, NextMv2):-
+	nl, write('---------------------------------'),
+	nl, write('That position is already ocuppied'),
+	nl, write('---------------------------------'),
+	nl,
+	next_mv(Mv1, NextMv1),
+	next_mv(Mv2, NextMv2).
 
 next_player(Player, NextPlayer):-
 	player(NextPlayer),
@@ -54,6 +74,16 @@ verify_piece_to_player(Piece, Player, Pair):-
 	player(Player), piece_to_player(Piece, Player, Pair).
 
 piece_to_player(Piece, Player, (Piece, Player)).
+
+get_movable_pieces(Plr1, Mv1, Mv2):-
+	movable_pieces(Plr1, Mv1),
+	next_player(Plr1, Plr2),
+	movable_pieces(Plr2, Mv2).
+
+
+%%--------
+%% INPUTS
+%%--------
 
 ask_piece(P):-
   pieces(Ps), repeat,
@@ -66,6 +96,51 @@ ask_coords(C, L):-
   ask_input('Line: ', L), L > -1, L < 3, nl.
 
 ask_input(X, Y):- write(X), nl, read(Y), !.
+
+
+%%-------------
+%% MOVE PIECES
+%%-------------
+
+replace_board([H|T], 0, C, P, [R|T]):- !, replace_line(H, C, P, R).
+
+replace_board([H|T], L, C, P, [H|R]):- L > -1, L1 is L-1, replace_board(T, L1, C, P, R), !.
+
+replace_board(L, _, _, _, _, L).
+
+
+replace_line([H|T], 0, P, [R|T]):- P = (l, _), replace(H, 2, P, R).
+
+replace_line([H|T], 0, P, [R|T]):- P = (m, _), replace(H, 1, P, R).
+
+replace_line([H|T], 0, P, [R|T]):- P = (s, _), replace(H, 0, P, R).
+
+replace_line([H|T], C, P, [H|R]):- C > -1, C1 is C - 1, replace_line(T, C1, P, R), !.
+
+replace_line(L, _, _, _, L).
+
+
+replace([H|T], 0, _, [_|T]):- H \= e, !, fail.
+
+replace([_|T], 0, P, [P|T]).
+
+replace([H|T], I, P, [H|R]):- I > -1, NI is I-1, replace(T, NI, P, R), !.
+
+replace(L, _, _, L):-fail.
+
+
+remove_piece([(N, Pr)|T], Piece, [(X, Pr)|T]):-
+	Piece = Pr, !, X is N-1.
+
+remove_piece([H|T], Piece, [H|R]):-
+	remove_piece(T, Piece, R).
+
+remove_piece(L, _, L):-fail.
+
+
+%% -----------
+%% DRAW BOARD
+%% -----------
 
 draw_piece( (T, C), B ):-
 	player(C), C = r,
@@ -234,32 +309,3 @@ dL(N, [_|T]):-
 	dL(5, T).
 
 dL(_, []):- write(' |').
-
-
-replace_board([H|T], 0, C, P, [R|T]):- !, replace_line(H, C, P, R).
-
-replace_board([H|T], L, C, P, [H|R]):- L > -1, L1 is L-1, replace_board(T, L1, C, P, R), !.
-
-replace_board(L, _, _, _, _, L).
-
-
-replace_line([H|T], 0, P, [R|T]):- P = (l, _), replace(H, 2, P, R).
-
-replace_line([H|T], 0, P, [R|T]):- P = (m, _), replace(H, 1, P, R).
-
-replace_line([H|T], 0, P, [R|T]):- P = (s, _), replace(H, 0, P, R).
-
-replace_line([H|T], C, P, [H|R]):- C > -1, C1 is C - 1, replace_line(T, C1, P, R), !.
-
-replace_line(L, _, _, _, L).
-
-
-replace([P|T], 0, P, [_|T]).
-
-replace([_|T], 0, P, [P|T]).
-
-replace([H|T], I, P, [H|R]):- I > -1, NI is I-1, replace(T, NI, P, R), !.
-
-replace(L, _, _, L).
-
-%% Fazer funcao de retirar pecas das movable pieces
