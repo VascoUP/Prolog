@@ -1,7 +1,7 @@
 player(r).
 player(b).
 
-pieces( [s, m, l] ).
+pieces( [s, m , l ] ).
 
 movable_pieces(r, [
 			(6, s),
@@ -21,9 +21,9 @@ board( [
 	     ]).
 
 
-%%-----------
-%% FUNCTIONS
-%%-----------
+%%-----------------------
+%% 			FUNCTIONS
+%%-----------------------
 
 game_cicle:-
 	board(Brd), player(Plr),
@@ -33,6 +33,7 @@ game_cicle:-
 %% Mv1 are the available pieces of the current player
 %% Mv2 are the available pieces of the other player
 cicle(Brd, Plr, Mv1, Mv2):-
+	print_player(Plr),
 	display_board(Brd),
 
 	nl, write('----------------------'),
@@ -141,6 +142,17 @@ remove_piece(L, _, L):-fail.
 %% -----------
 %% DRAW BOARD
 %% -----------
+
+print_player(Plr):-
+	Plr = r, !,
+	nl, write('	  RED TURN'), nl, nl.
+
+print_player(Plr):-
+	Plr = b, !,
+	nl, write('	 BLUE TURN'), nl, nl.
+
+print_player(_):-
+	nl, write('	ERROR'), nl, nl.
 
 draw_piece( (T, C), B ):-
 	player(C), C = r,
