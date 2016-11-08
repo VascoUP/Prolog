@@ -4,35 +4,50 @@ player(b).
 pieces( [s, m, l] ).
 
 movable_pieces(r, [
-			(3, s),
-			(3, m),
-			(3, l)
+			(6, s),
+			(6, m),
+			(6, l)
 		  ]).
 movable_pieces(b, [
-			(3, s),
-			(3, m),
-			(3, l)
+			(6, s),
+			(6, m),
+			(6, l)
 		  ]).
 
 board( [
     	 [ [e, e, e], [e, e, e], [e, e, e] ],
-    	 [ [e, e, (l, r)], [e, e, e], [e, e, e] ],
+    	 [ [e, e, e], [e, e, e], [e, e, e] ],
     	 [ [e, e, e], [e, e, e], [e, e, e] ]
 	     ]).
 
-game_cicle:- board(Brd), player(Plr), !,
-  cicle(Brd, Plr).
+game_cicle:- board(Brd), player(Plr), get_movable_pieces(Plr, Mv1, Mv2), !,
+	write(Mv1), nl, write(Mv2), nl,
+  cicle(Brd, Plr, Mv1, Mv2).
 
-cicle(Brd, Plr):- display_board(Brd),
+get_movable_pieces(Plr1, Mv1, Mv2):-
+	movable_pieces(Plr1, Mv1),
+	next_player(Plr1, Plr2),
+	movable_pieces(Plr2, Mv2).
+
+%% Mv1 are the available pieces of the current player
+%% Mv2 are the available pieces of the other player
+cicle(Brd, Plr, Mv1, Mv2):-
+	display_board(Brd),
+
+	nl, write('----------------------'),
+	nl, write(Mv1),
+	nl, write('----------------------'),
+	nl,
+
 	ask_piece(P), ask_coords(C, L),
 	verify_piece_to_player(P, Plr, Pair),
 	replace_board(Brd, L, C, Pair, Brd2),
 	next_player(Plr, Plr2),
-	!, cicle(Brd2, Plr2).
+	!, cicle(Brd2, Plr2, Mv2, Mv1).
 
-next_player(Player1, NextPlayer):-
+next_player(Player, NextPlayer):-
 	player(NextPlayer),
-	NextPlayer \= Player1, !.
+	NextPlayer \= Player, !.
 
 verify_piece_to_player(Piece, Player, Pair):-
 	player(Player), piece_to_player(Piece, Player, Pair).
