@@ -28,6 +28,7 @@
   7 - Dado o input do jogador poceder a função implementada em 6
 
       Dependência: 6 e 3
+      DONE
 
   8 - Adicionar função para verificar fim de jogo
 

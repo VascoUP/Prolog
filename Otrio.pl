@@ -261,3 +261,5 @@ replace([_|T], 0, P, [P|T]).
 replace([H|T], I, P, [H|R]):- I > -1, NI is I-1, replace(T, NI, P, R), !.
 
 replace(L, _, _, L).
+
+%% Fazer funcao de retirar pecas das movable pieces
