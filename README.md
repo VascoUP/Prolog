@@ -21,9 +21,12 @@
 
   5 - Adicionar função que retira uma dada peça da lista de peças de um dado jogador
 
+      DONE
+
   6 - Combinar 4 e 5
 
       Dependência: 4 e 5
+      DONE
 
   7 - Dado o input do jogador poceder a função implementada em 6
 
