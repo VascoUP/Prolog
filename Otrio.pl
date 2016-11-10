@@ -15,7 +15,7 @@ movable_pieces(b, [
 		  ]).
 
 board( [
-    	 [ [(s,r), e, (l,b)], [e, e, e], [e, e, (l,b)] ],
+    	 [ [(l,r), (m,r), (l,r)], [e, (m,r), e], [e, e, (s,r)] ],
     	 [ [(s,r), e, e], [(s,r), (m,b), (l,b)], [e, e, e] ],
     	 [ [e, e, e], [e, e, e], [(s,b), e, (l,b)] ]
 	     ]).
@@ -176,18 +176,53 @@ verify_diagonal(Board, Plr):-
 	element_board(Board, 0, 0, Position1),
 	element_board(Board, 1, 1, Position2),
 	element_board(Board, 2, 2, Position3),
-	write('Verify1'), nl,
 	equal_pieces(Position1, Position2, Position3, Plr).
 
 verify_diagonal(Board, Plr):-
 	element_board(Board, 2, 0, Position1),
 	element_board(Board, 1, 1, Position2),
 	element_board(Board, 0, 2, Position3),
-	write('Verify2'), nl,
 	equal_pieces(Position1, Position2, Position3, Plr).
 
-player_position(Position):- write(Position), nl.
+verify_position(Position, Plr):-
+	count_player_pieces(Position, Plr, Counter),
+	Counter = 3, !.
 
+verify_line([H|T], 0, Plr):-
+	write(0), nl, line_iter_position([H|T], 0, H, Plr).
+
+verify_line([H|T], 1, (Piece, Plr)):-
+	member((m, Plr), H),
+	verify_line(T, 2, (Piece, Plr)), !.
+
+verify_line([H|_], 2, Piece):-
+	write(H),
+	member(Piece, H).
+
+line_iter_position(_, _, [], _):-fail.
+
+line_iter_position([_|T], Counter, [H|_], Plr):-
+	H = (Piece, Plr),
+	wanted_piece(Piece, Piece2),
+	C1 is Counter + 1,
+	verify_line(T, C1, (Piece2, Plr)), !.
+
+line_iter_position(Line, Counter, [_|T], Plr):-
+	!, line_iter_position(Line, Counter, T, Plr).
+
+wanted_piece(s, l).
+
+wanted_piece(l, s).
+
+wanted_piece(_, _):-fail.
+
+count_player_pieces([], _, 0).
+
+count_player_pieces([H|T], Plr, Counter):-
+	H = (_, Plr), count_player_pieces(T, Plr, C1), Counter is C1 + 1.
+
+count_player_pieces([H|T], Plr, Counter):-
+	H \= (_, Plr), count_player_pieces(T, Plr, C1), Counter is C1.
 
 equal_pieces([], _):-fail.
 
