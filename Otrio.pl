@@ -15,9 +15,9 @@ movable_pieces(b, [
 		  ]).
 
 board( [
-    	 [ [e, (m,r), (l,r)], [e, (m, b), e], [e, e, (s,r)] ],
-    	 [ [(l,b), e, e], [(s,r), (m,b), (l,b)], [(m,b), e, e] ],
-    	 [ [e, e, e], [e, e, e], [(s,b), e, (l,b)] ]
+    	 [ [e, e, e], [e, e, e], [e, e, e] ],
+    	 [ [e, e, e], [e, e, e], [e, e, e] ],
+    	 [ [e, e, e], [e, e, e], [e, e, e] ]
 	     ]).
 
 
@@ -159,7 +159,9 @@ remove_piece(L, _, L):-fail.
 
 end_game(Board, Plr):-
 	not(verify_diagonal(Board, Plr)),
-	not(verify_board(Board, Plr)), !.
+	not(verify_columns(Board, Plr)),
+	not(verify_board(Board, Plr)), !,
+	fail.
 
 end_game(_, Plr):-
 	Plr = r,
@@ -186,11 +188,41 @@ verify_diagonal(Board, Plr):-
 	element_board(Board, 0, 2, Position3),
 	equal_pieces(Position1, Position2, Position3, Plr).
 
-verify_board([], _):-fail.
+verify_columns(Board, Plr):-
+	not(verify_column(Board, Plr, 0)),
+	not(verify_column(Board, Plr, 1)),
+	not(verify_column(Board, Plr, 2)), !,
+	fail.
+
+verify_columns(_, _).
+
+verify_column(Board, Plr, Column):-
+	element_board(Board, Column, 0, Position1),
+	element_board(Board, Column, 1, Position2),
+	element_board(Board, Column, 2, Position3),
+	column_pieces(Position1, Position2, Position3, Plr).
+
+column_pieces([(m, Plr)|_], Position3, (Piece, Plr)):-
+	!, equal_pieces(Position3, (Piece, Plr)).
+
+column_pieces([_|T], Position3, (Piece, Plr)):-
+	column_pieces(T, Position3, (Piece, Plr)).
+
+column_pieces([_], _, _, _):-fail.
+
+column_pieces([(Piece, Plr)|_], Position2, Position3, Plr):-
+	wanted_piece(Piece, Piece2), !,
+	column_pieces(Position2, Position3, (Piece2, Plr)).
+
+column_pieces([_|T], Position2, Position3, Plr):-
+	column_pieces(T, Position2, Position3, Plr).
+
+%%Verifies position and lines
+verify_board([], _):-!, fail.
 
 verify_board([H|T], Plr):-
 	not(verify_line(H, 0, Plr)), !,
-	verify_board(T, Plr).
+	verify_board(T, Plr), !.
 
 verify_board(_, _).
 
@@ -198,7 +230,7 @@ verify_position(Position, Plr):-
 	count_player_pieces(Position, Plr, Counter),
 	Counter = 3, !.
 
-verify_line([], _, _):-fail.
+verify_line([], _, _):-!, fail.
 
 verify_line([H|T], 0, Plr):-
 	not(verify_position(H,Plr)), !,
@@ -213,7 +245,7 @@ verify_line([H|_], 2, Piece):-
 	not(verify_position(H,Piece)), !,
 	member(Piece, H).
 
-verify_line(_, _, _).
+verify_line(_, _, _):-!, fail.
 
 line_iter_position(_, _, [], _):-fail.
 
