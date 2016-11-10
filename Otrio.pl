@@ -28,7 +28,7 @@ board( [
 game_cicle:-
 	board(Brd), player(Plr),
 	get_movable_pieces(Plr, Mv1, Mv2), !,
-  cicle(Brd, Plr, Mv1, Mv2).
+    cicle(Brd, Plr, Mv1, Mv2).
 
 %% Mv1 are the available pieces of the current player
 %% Mv2 are the available pieces of the other player
@@ -458,3 +458,54 @@ dL(N, [_|T]):-
 	dL(5, T).
 
 dL(_, []):- write(' |').
+
+%%-----------------------
+%% 		MENUS
+%%-----------------------
+
+
+%% Perceber como fazer clear screen
+
+logo :-         write('|                                                                                 |'), nl,
+                write('|       _ _ _ _      _ _ _ _ _ _       _ _ _       _ _ _ _ _ _      _ _ _ _       |'), nl,
+                write('|     /    _    \\  |           |    /  _ _  \\   |		     |   /    _    \\    |'), nl,
+                write('|    |   /   \\  |  |_ _ 	_ _|   |  |   |  |   |_ _	  _ _|	|   /   \\  |    |'), nl,
+                write('|    |  |     |  | 	   |   |	   |  |_ _|	 |     	 |	 |      |  |     |  |    |'), nl,
+                write('|    |  |     |  |	   |   |	   |   	     /     	 |	 |      |  |     |  |    |'), nl,
+                write('|    |  |     |  |	   |   |	   |   |\\	 \\	  _ _|	 |_ _   |  |     |  |    |'), nl,
+                write('|    |   \\_ /   |      |   |       |   | \\   \\ |           |  |   \\_ /   |     |'), nl,
+                write('|     \\_ _ _ _ /       | _ |       |_ _|  \\_ _\\|_ _ _ _ _ _|   \\_ _ _ _ /     |'), nl,
+                write('|                                                                                 |'), nl.
+
+				
+mainMenu :-     write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
+				logo,
+                write('|                                                                                 |'), nl,
+                write('|                                 Bem-Vindo!!!	                                  |'), nl,
+                write('|   				                                                  |'), nl,
+				write('|                  Menu:				                          |'), nl,
+				write('|   				                                                  |'), nl,
+                write('|                   1. Jogar                                                      |'), nl,
+                write('|                   2. Regras de Jogo                                             |'), nl,
+                write('|                   3. Acerca do Jogo                                             |'), nl,
+                write('|                   4. Sair                                                       |'), nl,
+                write('|                                                                                 |'), nl,
+                write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
+                get_char(R), get_char(_),
+                (R = '1' -> playMenu;
+				mainMenu).
+
+playMenu :-     write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
+                write('|                                                                                 |'), nl,
+                write('|                                                                                 |'), nl,
+				write('|                  Modos de Jogo:                                                 |'), nl,
+                write('|                                                                                 |'), nl,
+                write('|                    1. Humano vs Humano                                          |'), nl,
+                write('|                    2. Humano vs Computador                                      |'), nl,
+                write('|                    3. Computador vs Computador                                  |'), nl,
+                write('|                    4. Voltar                                                    |'), nl,
+                write('|                                                                                 |'), nl,
+                write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
+                get_char(G), get_char(_),
+                (G = '1' -> game_cicle;
+				playMenu).
