@@ -15,8 +15,8 @@ movable_pieces(b, [
 		  ]).
 
 board( [
-    	 [ [(l,r), (m,r), (l,r)], [e, (m,r), e], [e, e, (s,r)] ],
-    	 [ [(s,r), e, e], [(s,r), (m,b), (l,b)], [e, e, e] ],
+    	 [ [e, (m,r), (l,r)], [e, (m, b), e], [e, e, (s,r)] ],
+    	 [ [(l,b), e, e], [(s,r), (m,b), (l,b)], [(m,b), e, e] ],
     	 [ [e, e, e], [e, e, e], [(s,b), e, (l,b)] ]
 	     ]).
 
@@ -158,15 +158,17 @@ remove_piece(L, _, L):-fail.
 %%-----------------
 
 end_game(Board, Plr):-
-	Plr = r, !,
-	verify_diagonal(Board, Plr), !,
+	not(verify_diagonal(Board, Plr)),
+	not(verify_board(Board, Plr)), !.
+
+end_game(_, Plr):-
+	Plr = r,
 	nl, nl, write('----------------'),
 	nl, write(' RED PLAYER WON'),
 	nl, write('----------------'),
 	nl, nl.
 
-end_game(Board, Plr):-
-	verify_diagonal(Board, Plr), !,
+end_game(_, _):-
 	nl, nl, write('-----------------'),
 	nl, write(' BLUE PLAYER WON'),
 	nl, write('-----------------'),
@@ -184,20 +186,34 @@ verify_diagonal(Board, Plr):-
 	element_board(Board, 0, 2, Position3),
 	equal_pieces(Position1, Position2, Position3, Plr).
 
+verify_board([], _):-fail.
+
+verify_board([H|T], Plr):-
+	not(verify_line(H, 0, Plr)), !,
+	verify_board(T, Plr).
+
+verify_board(_, _).
+
 verify_position(Position, Plr):-
 	count_player_pieces(Position, Plr, Counter),
 	Counter = 3, !.
 
+verify_line([], _, _):-fail.
+
 verify_line([H|T], 0, Plr):-
-	write(0), nl, line_iter_position([H|T], 0, H, Plr).
+	not(verify_position(H,Plr)), !,
+	line_iter_position([H|T], 0, H, Plr).
 
 verify_line([H|T], 1, (Piece, Plr)):-
+	not(verify_position(H,Plr)), !,
 	member((m, Plr), H),
 	verify_line(T, 2, (Piece, Plr)), !.
 
 verify_line([H|_], 2, Piece):-
-	write(H),
+	not(verify_position(H,Piece)), !,
 	member(Piece, H).
+
+verify_line(_, _, _).
 
 line_iter_position(_, _, [], _):-fail.
 
@@ -245,7 +261,6 @@ equal_pieces([(Piece, Plr)|_], Position2, Position3, Plr):-
 	equal_pieces(Position2, Position3, (Piece, Plr)).
 
 equal_pieces([_|T], Position2, Position3, Plr):-
-	write("Position"), nl,
 	equal_pieces(T, Position2, Position3, Plr).
 
 
