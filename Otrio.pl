@@ -15,9 +15,9 @@ movable_pieces(b, [
 		  ]).
 
 board( [
-    	 [ [e, e, e], [e, e, e], [e, e, e] ],
-    	 [ [e, e, e], [e, e, e], [e, e, e] ],
-    	 [ [e, e, e], [e, e, e], [e, e, e] ]
+    	 [ [(s,r), e, (l,b)], [e, e, e], [e, e, (l,b)] ],
+    	 [ [(s,r), e, e], [(s,r), (m,b), (l,b)], [e, e, e] ],
+    	 [ [e, e, e], [e, e, e], [(s,b), e, (l,b)] ]
 	     ]).
 
 
@@ -43,9 +43,23 @@ cicle(Brd, Plr, Mv1, Mv2):-
 
 	ask_piece(P), !, ask_coords(C, L), !,
 	verify_piece_to_player(P, Plr, Pair),
-	next_cicle(P, Brd, L, C, Pair, Brd2, Plr, Plr2, Mv1, Mv2, NextMv1, NextMv2),
-	!, cicle(Brd2, Plr2, NextMv1, NextMv2).
+	next_cicle(P, Brd, L, C, Pair, Brd2, Plr, Plr2, Mv1, Mv2, NextMv1, NextMv2), !,
+	not(end_game(Brd2, Plr)), !,
+	cicle(Brd2, Plr2, NextMv1, NextMv2).
 
+cicle(_, Plr, _, _):-
+	next_player(Plr, NPlr),
+	NPlr = r, !,
+	nl, nl, write('-----------------'),
+	nl, write(' RED PLAYER WON'),
+	nl, write('-----------------'),
+	nl, nl.
+
+cicle(_, _, _, _):-
+	nl, nl, write('------------------'),
+	nl, write(' BLUE PLAYER WON'),
+	nl, write('------------------'),
+	nl, nl.
 
 %%--------------------
 %% HANDLE GAME CICLES
@@ -137,6 +151,79 @@ remove_piece([H|T], Piece, [H|R]):-
 	remove_piece(T, Piece, R).
 
 remove_piece(L, _, L):-fail.
+
+
+%%-----------------
+%% VERIFY END GAME
+%%-----------------
+
+end_game(Board, Plr):-
+	Plr = r, !,
+	verify_diagonal(Board, Plr), !,
+	nl, nl, write('----------------'),
+	nl, write(' RED PLAYER WON'),
+	nl, write('----------------'),
+	nl, nl.
+
+end_game(Board, Plr):-
+	verify_diagonal(Board, Plr), !,
+	nl, nl, write('-----------------'),
+	nl, write(' BLUE PLAYER WON'),
+	nl, write('-----------------'),
+	nl, nl.
+
+verify_diagonal(Board, Plr):-
+	element_board(Board, 0, 0, Position1),
+	element_board(Board, 1, 1, Position2),
+	element_board(Board, 2, 2, Position3),
+	write('Verify1'), nl,
+	equal_pieces(Position1, Position2, Position3, Plr).
+
+verify_diagonal(Board, Plr):-
+	element_board(Board, 2, 0, Position1),
+	element_board(Board, 1, 1, Position2),
+	element_board(Board, 0, 2, Position3),
+	write('Verify2'), nl,
+	equal_pieces(Position1, Position2, Position3, Plr).
+
+player_position(Position):- write(Position), nl.
+
+
+equal_pieces([], _):-fail.
+
+equal_pieces([Piece|_], Piece).
+
+equal_pieces([_|T], Piece):-
+	equal_pieces(T, Piece).
+
+equal_pieces([], _, _):-fail.
+
+equal_pieces([Piece|_], Position3, Piece):-
+	!, equal_pieces(Position3, Piece).
+
+equal_pieces([_|T], Position3, Piece):-
+	equal_pieces(T, Position3, Piece).
+
+equal_pieces([_], _, _, _):-fail.
+
+equal_pieces([(Piece, Plr)|_], Position2, Position3, Plr):-
+	equal_pieces(Position2, Position3, (Piece, Plr)).
+
+equal_pieces([_|T], Position2, Position3, Plr):-
+	write("Position"), nl,
+	equal_pieces(T, Position2, Position3, Plr).
+
+
+element_board([H|_], C, 0, Position):-
+	element_position(H, C, Position).
+
+element_board([_|T], C, L, Position):-
+	L1 is L - 1, element_board(T, C, L1, Position).
+
+element_position([Element|_], 0, Element).
+
+element_position([_|T], C, Element):-
+	C1 is C - 1, element_position(T, C1, Element).
 
 
 %% -----------
