@@ -35,6 +35,8 @@
 
   8 - Adicionar função para verificar fim de jogo
 
+      DONE
+
   9 - Acabar ciclo quando a função de 8 retornar verdade
 
       Dependência: 2 e 8
