@@ -1,3 +1,5 @@
+:- include('menu.pl').
+
 player(r).
 player(b).
 
@@ -25,6 +27,8 @@ board( [
 %% 			FUNCTIONS
 %%-----------------------
 
+otrio :- mainMenu.
+
 game_cicle:-
 	board(Brd), player(Plr),
 	get_movable_pieces(Plr, Mv1, Mv2), !,
@@ -36,9 +40,10 @@ cicle(Brd, Plr, Mv1, Mv2):-
 	print_player(Plr),
 	display_board(Brd),
 
-	nl, write('----------------------'),
-	nl, write(Mv1),
-	nl, write('----------------------'),
+	nl, write('---------------------------'),
+	nl, write('      Avaiable pieces      '), nl,
+	nl, write(Mv1), nl,
+	nl, write('---------------------------'),
 	nl,
 
 	ask_piece(P), !, ask_coords(C, L), !,
@@ -51,13 +56,13 @@ cicle(_, Plr, _, _):-
 	next_player(Plr, NPlr),
 	NPlr = r, !,
 	nl, nl, write('-----------------'),
-	nl, write(' RED PLAYER WON'),
+	nl, write(' * RED PLAYER WON * '),
 	nl, write('-----------------'),
 	nl, nl.
 
 cicle(_, _, _, _):-
 	nl, nl, write('------------------'),
-	nl, write(' BLUE PLAYER WON'),
+	nl, write(' * BLUE PLAYER WON * '),
 	nl, write('------------------'),
 	nl, nl.
 
@@ -101,16 +106,23 @@ get_movable_pieces(Plr1, Mv1, Mv2):-
 %%--------
 
 ask_piece(P):-
-  pieces(Ps), repeat,
-	ask_input('Piece: ', P), member(P, Ps), nl.
+	pieces(Ps), repeat,
+	ask_pieceName('Piece: ', P), member(P, Ps), nl.
 
 ask_coords(C, L):-
   repeat,
-	ask_input('Column: ', C), C > -1, C < 3, nl,
+	ask_column('Column: ', C), C \= 'a', C \= 'b', C \= 'c' , nl,
 	repeat,
-  ask_input('Line: ', L), L > -1, L < 3, nl.
+	ask_line('Line: ', L), L > -1, L < 3, nl.
 
-ask_input(X, Y):- write(X), nl, read(Y), !.
+ask_pieceName(X, Y):- nl, write(X), nl, get_char(Y), get_char(_).
+
+ask_column(X, C):- nl, write(X), nl, get_char(Y), get_char(_), 	
+					(Y = 'a' -> C = 0; Y = 'b' -> C = 1; Y ='c' -> C = 2).
+
+ask_line(X, L):- nl, write(X), nl, get_char(Y), get_char(_), 
+				(Y = '1' -> L = 0; Y = '2' -> L = 1; Y = '3' -> L = 2).
+
 
 
 %%-------------
@@ -166,13 +178,13 @@ end_game(Board, Plr):-
 end_game(_, Plr):-
 	Plr = r,
 	nl, nl, write('----------------'),
-	nl, write(' RED PLAYER WON'),
+	nl, write(' * RED PLAYER WON * '),
 	nl, write('----------------'),
 	nl, nl.
 
 end_game(_, _):-
 	nl, nl, write('-----------------'),
-	nl, write(' BLUE PLAYER WON'),
+	nl, write(' * BLUE PLAYER WON * '),
 	nl, write('-----------------'),
 	nl, nl.
 
@@ -317,11 +329,11 @@ element_position([_|T], C, Element):-
 
 print_player(Plr):-
 	Plr = r, !,
-	nl, write('	  RED TURN'), nl, nl.
+	nl, write('	* RED TURN * '), nl, nl.
 
 print_player(Plr):-
 	Plr = b, !,
-	nl, write('	 BLUE TURN'), nl, nl.
+	nl, write('	 * BLUE TURN * '), nl, nl.
 
 print_player(_):-
 	nl, write('	ERROR'), nl, nl.
@@ -492,88 +504,4 @@ dL(N, [_|T]):-
 
 	dL(5, T).
 
-dL(_, []):- write(' |').
-
-%%-----------------------
-%% 		MENUS
-%%-----------------------
-
-exitGame.
-
-cls :- write('\e[2J').
-
-logo :-         write('|                                                                                 |'), nl,
-                write('|       _ _ _ _      _ _ _ _ _ _      _ _ _       _ _ _ _ _ _       _ _ _ _       |'), nl,
-                write('|     /    _    \\   |           |   /  _ _  \\    |           |    /    _    \\     |'), nl,
-                write('|    |   /   \\   |  |_ _     _ _|  |  |   |  |   |_ _	  _ _|	 |   /   \\   |    |'), nl,
-                write('|    |  |     |  |      |   |	   |  |_ _|  |       |   |       |  |     |  |    |'), nl,
-                write('|    |  |     |  |      |   |	   |   	    /        |   |       |  |     |  |    |'), nl,
-                write('|    |  |     |  |      |   |	   |   |\\   \\	  _ _|   |_ _    |  |     |  |    |'), nl,
-                write('|    |   \\ _ /   |      |   |      |   | \\   \\   |           |   |   \\ _ /   |    |'), nl,
-                write('|     \\ _ _ _ _ /       | _ |      |_ _|  \\_ _\\  |_ _ _ _ _ _|    \\ _ _ _ _ /     |'), nl,
-                write('|                                                                                 |'), nl.
-
-
-mainMenu :-     write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-				write('|                                                                                 |'), nl,
-				logo,
-                write('|                                                                                 |'), nl,
-				write('|                                                                                 |'), nl,
-				write('|                                                                                 |'), nl,
-                write('|                                 Welcome!!!	                                  |'), nl,
-                write('|   				                                                  |'), nl,
-				write('|                       				                          |'), nl,
-				write('|   				                                                  |'), nl,
-                write('|                   1. Play                                                       |'), nl,
-                write('|                   2. Game Rules                                                 |'), nl,
-                write('|                   3. Exit                                                       |'), nl,
-                write('|                                                                                 |'), nl,
-                write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-                nl, write('Option: '), get_char(R), get_char(_), 
-                (R = '1' -> playMenu;
-				 R = '2' -> gameRules;
-				 R = '3' -> exitGame;
-				 mainMenu).
-
-playMenu :-     cls,
-				write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-                write('|                                                                                 |'), nl,
-                write('|                                                                                 |'), nl,
-				write('|                  Game Mode:                                                     |'), nl,
-                write('|                                                                                 |'), nl,
-                write('|                    1. Human vs Human                                            |'), nl,
-                write('|                    2. Human vs Computer                                         |'), nl,
-                write('|                    3. Computer vs Computer                                      |'), nl,
-                write('|                    4. Return                                                    |'), nl,
-                write('|                                                                                 |'), nl,
-                write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-                nl, write('Option: '), get_char(G), get_char(_),
-                (G = '1' -> cls, game_cicle;
-				 G = '4' -> cls, mainMenu;
-				 playMenu).
-
-gameRules :-	cls,
-				write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-				write('|                                                                                 |'), nl,
-				write('|                                                                                 |'), nl,
-				write('|                  Game Rules:                                                    |'), nl,
-				write('|                                                                                 |'), nl,
-				write('|                                                                                 |'), nl,
-				write('|   -> Each player has 9 pieces, 3 larges, 3 medium and 3 small and each one      |'), nl,
-				write('|      of them must put the respective pieces in empty spaces, not being able     |'), nl,
-				write('|      to move them after their placement                                         |'), nl,
-				write('|                                                                                 |'), nl,
-				write('|   -> If a player can not put one of his pieces, the turm changes to the other   |'), nl,
-				write('|      player, so that they can place pieces until they reach a OTRIO             |'), nl,
-				write('|                                                                                 |'), nl,
-				write('|      How to make a OTRIO:                                                       |'), nl,
-				write('|                                                                                 |'), nl,
-				write('|      1. Have 3 pieces with the same size and color on a board row               |'), nl,
-				write('|      2. Have 3 pieces of increasing or decreasing size on a board row           |'), nl,
-				write('|      3. Have 3 concentic pieces inthe same place                                |'), nl,
-				write('|                                                                                 |'), nl,
-				write('|                                                                                 |'), nl,
-				write('|                     Press enter to return to the main menu                      |'), nl,
-				write('|                                                                                 |'), nl,
-				write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-				nl, get_char(_), cls, mainMenu.			
+dL(_, []):- write(' |').	
