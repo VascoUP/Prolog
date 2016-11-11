@@ -47,4 +47,8 @@
 
   11 - Fazer menu inicial para escolher modo de jogo
 
-      ÚLTIMA COISA A FAZER
+      DONE
+
+  12 - Melhor display das movable_pieces de cada jogador
+
+  13 - Melhorar o aspeto da aplicação (Clear screens e cores)
