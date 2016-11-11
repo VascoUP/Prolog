@@ -224,26 +224,9 @@ end_game(Board, Player):-
 	not(verify_board(Board, Player)), !,
 	fail.
 
-<<<<<<< HEAD
-end_game(_, Plr):-
-	Plr = r,
-	nl, nl, write('----------------'),
-	nl, write(' * RED PLAYER WON * '),
-	nl, write('----------------'),
-	nl, nl.
-
-end_game(_, _):-
-	nl, nl, write('-----------------'),
-	nl, write(' * BLUE PLAYER WON * '),
-	nl, write('-----------------'),
-	nl, nl.
-
-verify_diagonal(Board, Plr):-
-=======
 end_game(_, _).
 
 verify_diagonal(Board, Player):-
->>>>>>> origin/master
 	element_board(Board, 0, 0, Position1),
 	element_board(Board, 1, 1, Position2),
 	element_board(Board, 2, 2, Position3),
@@ -379,23 +362,14 @@ element_position([_|T], C, Element):-
 %% DRAW BOARD
 %% -----------
 
-<<<<<<< HEAD
-print_player(Plr):-
-	Plr = r, !,
-	nl, write('	* RED TURN * '), nl, nl.
-
-print_player(Plr):-
-	Plr = b, !,
-	nl, write('	 * BLUE TURN * '), nl, nl.
-=======
 print_player(Player):-
 	Player = r, !,
-	nl, write('	  RED TURN'), nl, nl.
+	nl, write('	* RED TURN * '), nl, nl.
 
 print_player(Player):-
 	Player = b, !,
-	nl, write('	 BLUE TURN'), nl, nl.
->>>>>>> origin/master
+	nl, write('	 * BLUE TURN * '), nl, nl.
+
 
 print_player(_):-
 	nl, write('	ERROR'), nl, nl.
