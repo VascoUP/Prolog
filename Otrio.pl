@@ -42,7 +42,7 @@ cicle(Brd, Plr, Mv1, Mv2):-
 	nl,
 
 	ask_piece(P), !, ask_coords(C, L), !,
-	verify_piece_to_player(P, Plr, Pair),
+	piece_to_player(P, Plr, Pair),
 	next_cicle(P, Brd, L, C, Pair, Brd2, Plr, Plr2, Mv1, Mv2, NextMv1, NextMv2), !,
 	not(end_game(Brd2, Plr)), !,
 	cicle(Brd2, Plr2, NextMv1, NextMv2).
@@ -85,10 +85,10 @@ next_player(Player, NextPlayer):-
 	player(NextPlayer),
 	NextPlayer \= Player, !.
 
-verify_piece_to_player(Piece, Player, Pair):-
-	player(Player), piece_to_player(Piece, Player, Pair).
+piece_to_player(Piece, Player, Pair):-
+	player(Player), pTp(Piece, Player, Pair).
 
-piece_to_player(Piece, Player, (Piece, Player)).
+pTp(Piece, Player, (Piece, Player)).
 
 get_movable_pieces(Plr1, Mv1, Mv2):-
 	movable_pieces(Plr1, Mv1),
@@ -216,6 +216,9 @@ column_pieces([(Piece, Plr)|_], Position2, Position3, Plr):-
 
 column_pieces([_|T], Position2, Position3, Plr):-
 	column_pieces(T, Position2, Position3, Plr).
+
+%%verify_win(Board, Plr, Mv).
+
 
 %%Verifies position and lines
 verify_board([], _):-!, fail.
@@ -509,7 +512,7 @@ logo :-         write('|                                                        
                 write('|     \\ _ _ _ _ /       | _ |      |_ _|  \\_ _\\  |_ _ _ _ _ _|    \\ _ _ _ _ /     |'), nl,
                 write('|                                                                                 |'), nl.
 
-				
+
 mainMenu :-     write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
 				logo,
                 write('|                                                                                 |'), nl,
