@@ -500,6 +500,7 @@ dL(_, []):- write(' |').
 
 
 %% Perceber como fazer clear screen
+cls :- write('\e[2J').
 
 logo :-         write('|                                                                                 |'), nl,
                 write('|       _ _ _ _      _ _ _ _ _ _      _ _ _       _ _ _ _ _ _       _ _ _ _       |'), nl,
@@ -516,31 +517,31 @@ logo :-         write('|                                                        
 mainMenu :-     write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
 				logo,
                 write('|                                                                                 |'), nl,
-                write('|                                 Bem-Vindo!!!	                                  |'), nl,
+                write('|                                 Welcome!!!	                                  |'), nl,
                 write('|   				                                                  |'), nl,
 				write('|                  Menu:				                          |'), nl,
 				write('|   				                                                  |'), nl,
-                write('|                   1. Jogar                                                      |'), nl,
-                write('|                   2. Regras de Jogo                                             |'), nl,
-                write('|                   3. Acerca do Jogo                                             |'), nl,
-                write('|                   4. Sair                                                       |'), nl,
+                write('|                   1. Play                                                       |'), nl,
+                write('|                   2. Game Rules                                                 |'), nl,
+                write('|                   3. Exit                                                       |'), nl,
                 write('|                                                                                 |'), nl,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-                get_char(R), get_char(_),
+                nl, write('Option: '), get_char(R), get_char(_), 
                 (R = '1' -> playMenu;
-				mainMenu).
+				 mainMenu).
 
-playMenu :-     write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
+playMenu :-     cls,
+				write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                 write('|                                                                                 |'), nl,
                 write('|                                                                                 |'), nl,
-				write('|                  Modos de Jogo:                                                 |'), nl,
+				write('|                  Game Mode:                                                     |'), nl,
                 write('|                                                                                 |'), nl,
-                write('|                    1. Humano vs Humano                                          |'), nl,
-                write('|                    2. Humano vs Computador                                      |'), nl,
-                write('|                    3. Computador vs Computador                                  |'), nl,
-                write('|                    4. Voltar                                                    |'), nl,
+                write('|                    1. Human vs Human                                            |'), nl,
+                write('|                    2. Human vs Computer                                         |'), nl,
+                write('|                    3. Computer vs Computer                                      |'), nl,
+                write('|                    4. Return                                                    |'), nl,
                 write('|                                                                                 |'), nl,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-                get_char(G), get_char(_),
+                nl, write('Option: '), get_char(G), get_char(_),
                 (G = '1' -> game_cicle;
-				playMenu).
+				 playMenu).
