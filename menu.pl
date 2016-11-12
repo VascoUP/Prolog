@@ -18,7 +18,8 @@ logo :-         write('|                                                        
                 write('|                                                                                 |'), nl.
 
 
-mainMenu :-     write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
+mainMenu :-     cls,
+				write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
 				write('|                                                                                 |'), nl,
 				logo,
                 write('|                                                                                 |'), nl,
