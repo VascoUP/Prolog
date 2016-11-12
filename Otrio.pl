@@ -135,22 +135,6 @@ ask_line(X, L):- nl, write(X), nl, get_char(Y), get_char(_),
 
 
 
-random_piece(P) :- random(0, 2, Y), (Y = 0 -> P = 's'; Y = 1 -> P = 'm'; Y = 2 -> P = 'l').
-random_coords(C, L) :- random(0, 2, C), random(0, 2, L).
-
-analyze_board(0, _, _, _, _, _):-!, fail.
-
-analyze_board(_, Board, Player, Mv, BoardC, MvC) :-
-	random_piece(P),
-	remove_piece(Mv, P, MvC),
-	random_coords(C, L),
-	replace_board(Board, L, C, (P, Player), BoardC), !.
-
-analyze_board(N, Board, Player, Mv, BoardC, MvC) :-
-	N1 is N-1, !,
-	analyze_board(N1, Board, Player, Mv, BoardC, MvC).
-
-
 %%-------------
 %% MOVE PIECES
 %%-------------
@@ -215,6 +199,28 @@ e_play(Board, Mv, Player, LineC, ColumnC, PairC):-
 
 e_play(Board, Mv, Player, LineC, ColumnC, PairC):-
 	play_tier(1, Board, Mv, Player, LineC, ColumnC, PairC), !.
+
+e_play(Board, Mv, Player, LineC, ColumnC, PairC):-
+	analyze_board(50, Board, Player, Mv, LineC, ColumnC, PairC), !.
+
+e_play(Board, Mv, Player, LineC, ColumnC, PairC):-
+	has_options(Board, Mv, Player, 0, LineC, ColumnC, PairC), !.
+
+random_piece(P) :- random(0, 2, Y), (Y = 0 -> P = 's'; Y = 1 -> P = 'm'; Y = 2 -> P = 'l').
+random_coords(C, L) :- random(0, 2, C), random(0, 2, L).
+
+analyze_board(0, _, _, _, _, _, _):-!, fail.
+
+analyze_board(_, Board, Player, Mv, LineC, ColumnC, PairC) :-
+	random_piece(Piece),
+	remove_piece(Mv, Piece, _),
+	pTp(Piece, Player, PairC),
+	random_coords(ColumnC, LineC),
+	replace_board(Board, LineC, ColumnC, (Piece, Player), _), !.
+
+analyze_board(N, Board, Player, Mv, LineC, ColumnC, PairC) :-
+	N1 is N-1, !,
+	analyze_board(N1, Board, Player, Mv, LineC, ColumnC, PairC).
 
 play_tier(Tier, _, _, _, _, _, _):-
 	Tier > 3, !, fail.
@@ -397,7 +403,7 @@ column_pieces([(Piece, Player)|_], Position2, Position3, Player):-
 column_pieces([_|T], Position2, Position3, Player):-
 	column_pieces(T, Position2, Position3, Player).
 
-%%Verifies position and lines
+%% Verifies position and lines
 verify_board([], _):-!, fail.
 
 verify_board([H|T], Player):-
