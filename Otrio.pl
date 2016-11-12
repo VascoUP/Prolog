@@ -132,9 +132,16 @@ ask_column(X, C):- nl, write(X), nl, get_char(Y), get_char(_),
 					(Y = 'a' -> C = 0; Y = 'b' -> C = 1; Y ='c' -> C = 2).
 
 ask_line(X, L):- nl, write(X), nl, get_char(Y), get_char(_),
-				(Y = '1' -> L = 0; Y = '2' -> L = 1; Y = '3' -> L = 2).
+		(Y = '1' -> L = 0; Y = '2' -> L = 1; Y = '3' -> L = 2).
 
+randomPiece(P) :- random(0, 2, Y), (Y = 0 -> P = 's'; Y = 1 -> P = 'm'; Y = 2 -> P = 'l').
+randomCoords(C, L) :- random(0, 2, C), random(0, 2, L).
 
+analyzeBoard(Board, Player, Mv, BoardC, MvC) :-
+	randomPiece(P),
+	remove_piece(Mv, P, MvC), !,
+	randomCoords(C, L),
+	replace_board(Board, L, C, (P, Player), BoardC), !.
 
 %%-------------
 %% MOVE PIECES
