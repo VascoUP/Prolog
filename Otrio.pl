@@ -63,12 +63,11 @@ cicle(Mode, Board, Player, Mv1, Mv2):-
 	next_player(PlayerC, Pl2),
 	verify_movable_pieces(Board2, PlayerC, Pl2, Mv1C, Mv2C), nl, !,
 	(
-		( not(verify_pieces(Mv2C)) ; not(has_options(Board2, Mv2C, Player2, 0)) ) ->
-			equal_player(Player, Player2), next_mv(Mv2C, NextMv1), next_mv(Mv1C, NextMv2)
-		;
+		( verify_pieces(Mv1C) ; has_options(Board2, Mv1C, Player2, 0, _, _, _) ) ->
 			equal_player(PlayerC, Player2), next_mv(Mv1C, NextMv1), next_mv(Mv2C, NextMv2)
-	), write(NextMv1), nl, write(NextMv2), nl, write(Player2), nl,
-	cicle(Mode, Board2, Player2, NextMv1, NextMv2).
+		;
+			equal_player(Player, Player2), next_mv(Mv2C, NextMv1), next_mv(Mv1C, NextMv2)
+	), cicle(Mode, Board2, Player2, NextMv1, NextMv2).
 
 
 %%--------------------
@@ -134,14 +133,23 @@ ask_column(X, C):- nl, write(X), nl, get_char(Y), get_char(_),
 ask_line(X, L):- nl, write(X), nl, get_char(Y), get_char(_),
 		(Y = '1' -> L = 0; Y = '2' -> L = 1; Y = '3' -> L = 2).
 
-randomPiece(P) :- random(0, 2, Y), (Y = 0 -> P = 's'; Y = 1 -> P = 'm'; Y = 2 -> P = 'l').
-randomCoords(C, L) :- random(0, 2, C), random(0, 2, L).
 
-analyzeBoard(Board, Player, Mv, BoardC, MvC) :-
-	randomPiece(P),
-	remove_piece(Mv, P, MvC), !,
-	randomCoords(C, L),
+
+random_piece(P) :- random(0, 2, Y), (Y = 0 -> P = 's'; Y = 1 -> P = 'm'; Y = 2 -> P = 'l').
+random_coords(C, L) :- random(0, 2, C), random(0, 2, L).
+
+analyze_board(0, _, _, _, _, _):-!, fail.
+
+analyze_board(_, Board, Player, Mv, BoardC, MvC) :-
+	random_piece(P),
+	remove_piece(Mv, P, MvC),
+	random_coords(C, L),
 	replace_board(Board, L, C, (P, Player), BoardC), !.
+
+analyze_board(N, Board, Player, Mv, BoardC, MvC) :-
+	N1 is N-1, !,
+	analyze_board(N1, Board, Player, Mv, BoardC, MvC).
+
 
 %%-------------
 %% MOVE PIECES
@@ -188,8 +196,7 @@ remove_piece(L, _, L):-fail.
 
 play(player, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C):-
 	p_play(Player, Line, Column, Pair),
-	next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C), !,
-	write('Next cicle: '), write(Mv2C), nl.
+	next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C), !.
 
 play(computer, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C):-
 	e_play(Board, Mv, Player, Line, Column, Pair),
@@ -284,35 +291,35 @@ next_piece(s, m, 1).
 next_piece(m, l, 2).
 next_piece(_, _, _):-fail.
 
-has_options(_, _, _, 3):-!, fail.
+has_options(_, _, _, 3, _, _, _):-!, fail.
 
-has_options(Board, Mv, Player, Line):-
-	has_options_line(Board, Mv, Player, Line, 0), !.
+has_options(Board, Mv, Player, Line, Line, ColumnC, PairC):-
+	has_options_line(Board, Mv, Player, Line, 0, ColumnC, PairC), !.
 
-has_options(Board, Mv, Player, Line):-
+has_options(Board, Mv, Player, Line, LineC, ColumnC, PairC):-
 	L1 is Line + 1, !,
-	has_options(Board, Mv, Player, L1).
+	has_options(Board, Mv, Player, L1, LineC, ColumnC, PairC).
 
-has_options_line(_, _, _, _, 3):-!, fail.
+has_options_line(_, _, _, _, 3, _, _):-!, fail.
 
-has_options_line(Board, Mv, Player, Line, Column):-
-	has_options_position(Board, Line, Column, (s, Player), Mv), !.
+has_options_line(Board, Mv, Player, Line, Column, Column, PairC):-
+	has_options_position(Board, Line, Column, (s, Player), Mv, PairC), !.
 
-has_options_line(Board, Mv, Player, Line, Column):-
+has_options_line(Board, Mv, Player, Line, Column, ColumnC, PairC):-
 	C1 is Column + 1, !,
-	has_options_line(Board, Mv, Player, Line, C1).
+	has_options_line(Board, Mv, Player, Line, C1, ColumnC, PairC).
 
-has_options_position(Board, Line, Column, Pair, Mv):-
+has_options_position(Board, Line, Column, Pair, Mv, Pair):-
 	replace_board(Board, Line, Column, Pair, _),
 	Pair = (Piece, _),
 	remove_piece(Mv, Piece, _), !.
 
-has_options_position(Board, Line, Column, Pair, Mv):-
+has_options_position(Board, Line, Column, Pair, Mv, PairC):-
 	Pair = (Piece, Player),
 	next_piece(Piece, Piece2, _), !,
-	has_options_position(Board, Line, Column, (Piece2, Player), Mv), !.
+	has_options_position(Board, Line, Column, (Piece2, Player), Mv, PairC), !.
 
-has_options_position(_, _, _, _, _):-fail.
+has_options_position(_, _, _, _, _, _):-!, fail.
 
 
 %%-----------------
@@ -329,7 +336,7 @@ end_game(_, _):-!.
 
 verify_movable_pieces(Board, Player1, Player2, Mv1, Mv2):-
 	( not(verify_pieces(Mv1)) ; not(verify_pieces(Mv2)) ;
-	 	not(has_options(Board, Mv1, Player1, 0)) ; not(has_options(Board, Mv2, Player2, 0))
+	 	not(has_options(Board, Mv1, Player1, 0, _, _, _)) ; not(has_options(Board, Mv2, Player2, 0, _, _, _))
 	), !.
 
 verify_movable_pieces(_, _, _, _, _):-
