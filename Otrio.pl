@@ -37,8 +37,10 @@ board( [
 
 
 %%-----------------------
-%%                      FUNCTIONS
+%%  FUNCTIONS
 %%-----------------------
+
+not(Arg1):- \+ Arg1.
 
 otrio :- mainMenu.
 
@@ -678,4 +680,3 @@ dL(N, [_|T]):-
         dL(5, T).
 
 dL(_, []):- write(' |').
-
