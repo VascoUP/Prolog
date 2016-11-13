@@ -510,28 +510,31 @@ verify_position(Position, Player):-
 verify_line([], _, _):-!, fail.
 
 verify_line([H|T], 0, Player):-
-        line_win_position([H|T], 0, H, Player).
+        line_win_position([H|T], H, Player).
 
 verify_line([H|T], 1, (Piece, Player)):-
-        !, member((m, Player), H),
+        member((Piece, Player), H),
         verify_line(T, 2, (Piece, Player)).
 
-verify_line([H|_], 2, Piece):-
-        member(Piece, H).
+verify_line([H|T], 1, (Piece, Player)):-
+        member((m, Player), H),
+        wanted_piece(Piece, Piece2),
+        verify_line(T, 2, (Piece2, Player)).
+
+verify_line([H|_], 2, (Piece, Player)):-
+
+        member((Piece, Player), H).
 
 verify_line(_, _, _):-!, fail.
 
 
-line_win_position(_, _, [], _):-!, fail.
+line_win_position(_, [], _):-!, fail.
 
-line_win_position([_|T], Counter, [H|_], Player):-
-        H = (Piece, Player),
-        wanted_piece(Piece, Piece2),
-        C1 is Counter + 1,
-        verify_line(T, C1, (Piece2, Player)), !.
+line_win_position([_|T], [(Piece, Player)|_], Player):-
+        verify_line(T, 1, (Piece, Player)), !.
 
-line_win_position(Line, Counter, [_|T], Player):-
-        !, line_win_position(Line, Counter, T, Player).
+line_win_position(Line, [_|T], Player):-
+        !, line_win_position(Line, T, Player).
 
 
 wanted_piece(s, l).
