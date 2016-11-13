@@ -1,5 +1,5 @@
-:- include('menu.pl').
 :- use_module(library(random)).
+:- ensure_loaded('menu.pl').
 
 player(r).
 player(b).
@@ -694,3 +694,4 @@ dL(N, [_|T]):-
         dL(5, T).
 
 dL(_, []):- write(' |').
+

@@ -103,8 +103,8 @@ difficultyMenuPVC:- cls,
                                         write('|                                                                                 |'), nl,
                                         write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                                         nl, write('Option: '), get_char(G), get_char(_),
-                                                (G = '1' -> cls, game_cicle(player, computer, easy);
-                                                 G = '2' -> cls, game_cicle(player, computer, hard);
+                                                (G = '1' -> cls, random(0, 2, Y), (Y = 0 -> game_cicle(player, computer, easy); Y = 1 -> game_cicle(computer, player, easy));
+                                                 G = '2' -> cls, random(0, 1, Y), (Y = 0 -> game_cicle(player, computer, hard); Y = 1 -> game_cicle(computer, player, hard));
                                                 G = '3' -> cls, playMenu;
                                                 playMenu).
                                                 
