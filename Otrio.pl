@@ -193,8 +193,8 @@ play(player, _, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, Replay):-
         next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, Replay), !.
 
 play(computer, Difficulty, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, false):-
+        write(Difficulty), nl,
         e_play(Difficulty, Board, Mv, Player, Mv2, Line, Column, Pair),
-        write(Player), nl, write(Line), nl, write(Column), nl, write(Pair), nl,
         next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, _), !.
 
 p_play(Player, LineC, ColumnC, PairC):-
@@ -203,25 +203,31 @@ p_play(Player, LineC, ColumnC, PairC):-
 
 %% Exclusive to the easy mode
 e_play(easy, Board, Mv, Player, _, LineC, ColumnC, PairC):-
-        random(0, 100, X), !, X < 50,
+        write('easy'), nl,
+        random(0, 100, X), X < 50, !,
         next_win(Board, Mv, Player, LineC, ColumnC, PairC), !.
 
 %% Exclusive to the hard mode
 e_play(hard, Board, Mv, Player, _,  LineC, ColumnC, PairC):-
+        write('hard'), nl,
         next_win(Board, Mv, Player, LineC, ColumnC, PairC), !.
 
 e_play(_, Board, _, Player, Mv2, LineC, ColumnC, (Piece, Player)):-
+        write('?'), nl,
         next_player(Player, Player2),
         next_win(Board, Mv2, Player2, LineC, ColumnC, (Piece, _)), !.
 
 %% Exclusive to the hard mode
 e_play(hard, Board, Mv, Player, _, LineC, ColumnC, (Piece, Player)):-
+        write('hard'), nl,
         play_tier(1, Board, Mv, Player, LineC, ColumnC, (Piece, _)), !.
 
 e_play(_, Board, Mv, Player, _, LineC, ColumnC, PairC):-
+        write('?'), nl,
         analyze_board(50, Board, Player, Mv, LineC, ColumnC, PairC), !.
 
 e_play(_, Board, Mv, Player, _, LineC, ColumnC, PairC):-
+        write('?'), nl,
         has_options(Board, Mv, Player, 0, LineC, ColumnC, PairC), !.
 
 random_piece(P) :- random(0, 2, Y), (Y = 0 -> P = 's'; Y = 1 -> P = 'm'; Y = 2 -> P = 'l').
