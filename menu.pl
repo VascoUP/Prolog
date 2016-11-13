@@ -50,7 +50,7 @@ mainMenu:-      !, cls,
                 (R = '1' -> !, playMenu;
                  R = '2' -> !, gameRules;
                  R = '3' -> !, credits;
-                 R = '4' -> !, exitGame;
+                 R = '4' -> exitGame;
                  !, mainMenu).
 
 
@@ -157,3 +157,4 @@ credits:- cls,
           write('|                                                                                 |'), nl,
           write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
           get_char(_), mainMenu.
+    
