@@ -91,7 +91,6 @@ cicle(Board, Player, Mv1, Mv2, ModeGame1, ModeGame2, Difficulty):-
         ), cicle(Board2, Player2, NextMv1, NextMv2, NextMode1, NextMode2, Difficulty).
 
 %%Predicates that creates the turn of each player and allows them to play
-
 play(player, _, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, Replay):-
         p_play(Player, Line, Column, Pair),
         next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, Replay), !.
@@ -111,6 +110,8 @@ p_play(Player, LineC, ColumnC, PairC):-
 %% HANDLE GAME CICLES
 %%--------------------
 
+%% Creates the the different cicles. After the first player, the next_cicle is called and this is done successively
+
 next_cicle(Board, Line, Column, (Piece, Player), Board2, Player, Player2, Mv1, Mv2, NextMv1, NextMv2, false):-
         replace_board(Board, Line, Column, (Piece, Player), Board2),
         remove_piece(Mv1, Piece, NextMv2), !,
@@ -126,6 +127,7 @@ next_cicle(Board, _, _, _, Board, Player, Player, Mv1, Mv2, NextMv1, NextMv2, tr
         equal_mv(Mv2, NextMv2).
 
 
+%%Creates the next player to play the game. After the first player this predicate is called and this is done successively
 next_player(Player, PlayerC, Mv2, Mv1C):-
         next_player(Player, PlayerC),
         equal_mv(Mv2, Mv1C).
@@ -138,13 +140,14 @@ next_player(Player, NextPlayer):-
         NextPlayer \= Player, !.
 
 
+%%Match a piece to a player
 piece_to_player(Piece, Player, Pair):-
         player(Player), pTp(Piece, Player, Pair).
 
-
+%%Match a piece to a player
 pTp(Piece, Player, (Piece, Player)).
 
-
+%%Gets the movable pieces from a certain player (Player1 or Player2)
 get_movable_pieces(Player1, Mv1, Mv2):-
         movable_pieces(Player1, Mv1),
         next_player(Player1, Player2),
@@ -227,6 +230,8 @@ remove_piece(L, _, L):-fail.
 %% "AI"
 %%------
 
+%% e_play is a predicate that allows the computer to play
+
 %% Exclusive to the easy mode
 e_play(easy, Board, Mv, Player, _, LineC, ColumnC, PairC):-
         random(0, 100, X), X < 50,
@@ -250,10 +255,13 @@ e_play(_, Board, Mv, Player, _, LineC, ColumnC, PairC):-
 e_play(_, Board, Mv, Player, _, LineC, ColumnC, PairC):-
         has_options(Board, Mv, Player, 0, LineC, ColumnC, PairC), !.
 
-
+%% Creates a piece randomly (the piece can be small, medium or large)
 random_piece(P) :- random(0, 2, Y), (Y = 0 -> P = 's'; Y = 1 -> P = 'm'; Y = 2 -> P = 'l').
+
+%% Creates the column and line where the player will put the piece
 random_coords(C, L) :- random(0, 2, C), random(0, 2, L).
 
+%% Predicates that allow to put the random piece in the respective coordinates
 
 analyze_board(0, _, _, _, _, _, _):-!, fail.
 
@@ -268,6 +276,7 @@ analyze_board(N, Board, Player, Mv, LineC, ColumnC, PairC) :-
         N1 is N-1, !,
         analyze_board(N1, Board, Player, Mv, LineC, ColumnC, PairC).
 
+%% Predicates that allow to analyze the best movement to do using the tiers defined
 
 play_tier(Tier, _, _, _, _, _, _):-
         not(tier(Tier)), !, fail.
@@ -284,6 +293,7 @@ play_tier(Tier, Board, Mv, Player, LineC, ColumnC, PairC):-
         !, T1 is Tier+1,
         play_tier(T1, Board, Mv, Player, LineC, ColumnC, PairC).
 
+%% Checks the possibility of playing a piece from a tier
 
 possible_tier_pieces(_, _, _, [], []).
 
@@ -296,16 +306,17 @@ possible_tier_pieces(Board, Mv, Player, [H|T], [H|R]):-
 possible_tier_pieces(Board, Mv, Player, [_|T], R):-
     !, possible_tier_pieces(Board, Mv, Player, T, R).
 
-
+%% Creates a random element
 random_elem(Elements, Elem):-
         length(Elements, N),
         random(0, N, X),
         element_position(Elements, X, Elem).
 
-
+%% Predicate that "creates" a winner
 next_win(Board, Mv, Player, Line, Column, Pair):-
         win_board(Board, Mv, Player, 0, Line, Column, Pair).
 
+%% Predicates that checks if the board is in a state of victory
 
 win_board(_, _, _, 3, _, _, _):-!, fail.
 
@@ -317,6 +328,7 @@ win_board(Board, Mv, Player, Line, LineC, ColumnC, PairC):-
         L1 is Line + 1, !,
         win_board(Board, Mv, Player, L1, LineC, ColumnC, PairC).
 
+%% Predicates that checks if the line is in a state of victory
 
 win_line(_, _, _, _, 3, _, _):-!, fail.
 
@@ -328,6 +340,7 @@ win_line(Board, Mv, Player, Line, Column, Column2, Pair):-
         C1 is Column + 1, !,
         win_line(Board, Mv, Player, Line, C1, Column2, Pair).
 
+%% Predicates that checks if the position is in a state of victory
 
 win_position(Board, Line, Column, Pair, Mv, Pair2):-
         replace_board(Board, Line, Column, Pair, Board2),
@@ -343,12 +356,14 @@ win_position(Board, Line, Column, Pair, Mv, Pair2):-
 
 win_position(_, _, _, _, _, _):-fail.
 
+%% Next pieces to play
 
 next_piece(s, m, 1).
 next_piece(m, l, 2).
 next_piece(_, _, _):-fail.
 
-
+%% Verifies if there is any option to take
+     
 has_options(_, _, _, 3, _, _, _):-!, fail.
 
 has_options(Board, Mv, Player, Line, Line, ColumnC, PairC):-
@@ -358,6 +373,7 @@ has_options(Board, Mv, Player, Line, LineC, ColumnC, PairC):-
         L1 is Line + 1, !,
         has_options(Board, Mv, Player, L1, LineC, ColumnC, PairC).
 
+%% Verifies if there is any option in that line to take
 
 has_options_line(_, _, _, _, 3, _, _):-!, fail.
 
@@ -368,7 +384,8 @@ has_options_line(Board, Mv, Player, Line, Column, ColumnC, PairC):-
         C1 is Column + 1, !,
         has_options_line(Board, Mv, Player, Line, C1, ColumnC, PairC).
 
-
+%% Verifies if there is any option in that position to take
+          
 has_options_position(Board, Line, Column, Pair, Mv, Pair):-
         replace_board(Board, Line, Column, Pair, _),
         Pair = (Piece, _),
@@ -386,11 +403,13 @@ has_options_position(_, _, _, _, _, _):-!, fail.
 %% VERIFY END GAME
 %%-----------------
 
+%% Ends the game_cicle with a print about the winner
+
 cicle_end_game(Board, Player):-
   !, end_game(Board, Player),
   print_win(Board, Player).
 
-
+%% Predicates that ends the game
 end_game(Board, Player):-
         not(verify_diagonal(Board, Player)),
         not(verify_columns(Board, Player)),
@@ -399,6 +418,7 @@ end_game(Board, Player):-
 
 end_game(_, _).
 
+%% Verifies if there is any movable pieces to play
 
 has_movable_pieces(Board, Player1, Player2, Mv1, Mv2):-
         ( not(verify_pieces(Mv1)) ; not(verify_pieces(Mv2)) ;
@@ -416,6 +436,7 @@ has_movable_pieces(Board, _, _, _, _):-
         sleep(5), !, fail.
 
 
+%% Verifies the pieces played
 verify_pieces([]).
 
 verify_pieces([H|_]):-
@@ -424,6 +445,7 @@ verify_pieces([H|_]):-
 verify_pieces([_|T]):-
         !, verify_pieces(T).
 
+%% Verifies the diagonals
 
 verify_diagonal(Board, Player):-
         element_board(Board, 0, 0, Position1),
@@ -443,6 +465,8 @@ verify_diagonal(Position1, Position2, Position3, Player):-
 verify_diagonal(Position1, Position2, Position3, Player):-
   ascending_pieces(Position1, Position2, Position3, Player).
 
+
+%% Verifies the columns
 
 verify_columns(Board, Player):-
         not(verify_column(Board, Player, 0)),
@@ -464,6 +488,8 @@ verify_column(Position1, Position2, Position3, Player):-
 verify_column(Position1, Position2, Position3, Player):-
   ascending_pieces(Position1, Position2, Position3, Player).
 
+%% Verifies the pieces placed in columns
+
 column_pieces([(m, Player)|_], Position3, (Piece, Player)):-
         !, equal_pieces(Position3, (Piece, Player)).
 
@@ -481,6 +507,7 @@ column_pieces([_|T], Position2, Position3, Player):-
 
 
 %% Verifies position and lines
+
 verify_board([], _):-!, fail.
 
 verify_board([H|_], Player):-
@@ -527,6 +554,7 @@ verify_line([H|_], 2, (Piece, Player)):-
 
 verify_line(_, _, _):-!, fail.
 
+%% Verifies if a line is in a victory state
 
 line_win_position(_, [], _):-!, fail.
 
@@ -536,6 +564,7 @@ line_win_position([_|T], [(Piece, Player)|_], Player):-
 line_win_position(Line, [_|T], Player):-
         !, line_win_position(Line, T, Player).
 
+%% Wanted pieces to play
 
 wanted_piece(s, l).
 
@@ -543,7 +572,8 @@ wanted_piece(l, s).
 
 wanted_piece(_, _):-fail.
 
-
+%% Counts the different pieces from a player
+       
 count_player_pieces([], _, 0).
 
 count_player_pieces([H|T], Player, Counter):-
@@ -552,7 +582,8 @@ count_player_pieces([H|T], Player, Counter):-
 count_player_pieces([H|T], Player, Counter):-
         H \= (_, Player), count_player_pieces(T, Player, C1), Counter is C1.
 
-
+%%Verifies if the pieces are equal
+  
 equal_pieces([], _):-fail.
 
 equal_pieces([Piece|_], Piece).
@@ -576,6 +607,7 @@ equal_pieces([(Piece, Player)|_], Position2, Position3, Player):-
 equal_pieces([_|T], Position2, Position3, Player):-
         equal_pieces(T, Position2, Position3, Player).
 
+%% Verify if the pieces are in an ascending disposition
 
 ascending_pieces([], _):-fail.
 
@@ -603,7 +635,6 @@ ascending_pieces([(Piece, Player)|_], Position2, Position3, Player):-
 
 ascending_pieces([_|T], Position2, Position3, Player):-
         !, ascending_pieces(T, Position2, Position3, Player).
-
 
 element_board([H|_], C, 0, Position):-
         element_position(H, C, Position).
@@ -633,10 +664,12 @@ equal_column(Column, Column).
 %% DRAW BOARD
 %% -----------
 
+%% Prints the winner
 print_win(Board, Player):-
   !, display_board(Board),
   print_win_player(Player), sleep(5).
 
+%% Prints the winner
 print_win_player(Player):-
   Player = r, !,
   nl, write('* PLAYER '),
@@ -648,7 +681,7 @@ print_win_player(_):-
   write('BLUE '),
   write('WON THE GAME *'), nl, nl.
 
-
+%% Prints the different player on each turn
 print_player(Player):-
         Player = r, !,
         nl, write('     * RED TURN * '), nl, nl.
@@ -657,7 +690,8 @@ print_player(Player):-
         Player = b, !,
         nl, write('     * BLUE TURN * '), nl, nl.
 
-
+%% Draws the pieces of each player
+       
 draw_piece( (T, C), B ):-
         player(C), C = r,
         member( (T, C), B ),
@@ -670,34 +704,40 @@ draw_piece( (T, C), B ):-
 
 draw_piece( _, _ ):- write(' ').
 
+%% Displays the pieces of each player
+
 display_mv(Mv):-
   nl, write('--------------------'),
   nl, write('  Available pieces'),
   nl, nl, display_mv_info(Mv),
   nl, write('--------------------').
 
+%% Displays the information of the pieces from each player
 display_mv_info([]).
 
 display_mv_info([H|T]):-
   !, display_type_info(H),
   display_mv_info(T).
 
+%% Displays the type of the piece
+
 display_type_info((N, Type)):-
   write('-> '), write(N),
   Type = s,
-  write(' small pieces'), nl.
+  write(' small pieces (s)'), nl.
 
 display_type_info((_, Type)):-
   Type = m,
-  write(' medium pieces'), nl.
+  write(' medium pieces (m)'), nl.
 
 display_type_info((_, Type)):-
   Type = l,
-  write(' large pieces'), nl.
+  write(' large pieces (l)'), nl.
 
+%% Displays the board created
+       
 display_board(B):- !, cls, write('     a       b       c'), nl,
         dB(1, B).
-
 
 dB(N, [H|T]):-
   N =< 3, !,
@@ -709,7 +749,8 @@ dB(N, [H|T]):-
 dB(_,[]):-
   write('  -----------------------'), nl.
 
-
+%% Displays the lines from the board
+   
 display_line(L, N, B):-
         N = 3, !,
         N1 is N+1,
