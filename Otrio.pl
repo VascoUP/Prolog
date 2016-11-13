@@ -44,7 +44,7 @@ movable_pieces(b, [
 
 board( [
          [ [e, e, e], [e, e, e], [e, e, e] ],
-         [ [e, e, e], [(s,r), (m,r), (l,r)], [e, e, e] ],
+         [ [e, e, e], [e, e, e], [e, e, e] ],
          [ [e, e, e], [e, e, e], [e, e, e] ]
              ]).
 
@@ -71,16 +71,12 @@ cicle(Board, Player, Mv1, Mv2, ModeGame1, ModeGame2, Difficulty):-
         display_board(Board),
 
         print_player(Player),
-        nl, write('---------------------------'),
-        nl, write('      Avaiable pieces      '), nl,
-        nl, write(Mv1), nl,
-        nl, write('---------------------------'),
-        nl,
+        display_mv(Mv1),
 
         play(ModeGame1, Difficulty, Board, Player, Mv1, Mv2, Board2, PlayerC, Mv1C, Mv2C, Replay), !,
         not(cicle_end_game(Board2, Player)), !,
         next_player(PlayerC, Pl2),
-        verify_movable_pieces(Board2, PlayerC, Pl2, Mv1C, Mv2C), nl, !,
+        has_movable_pieces(Board2, PlayerC, Pl2, Mv1C, Mv2C), nl, !,
         (
                 ( not(Replay), not(verify_pieces(Mv1C)), has_options(Board2, Mv1C, Player2, 0, _, _, _) ) ->
                         write('Played'), nl,
@@ -98,7 +94,7 @@ play(player, _, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, Replay):-
         next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, Replay), !.
 
 play(computer, Difficulty, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, false):-
-        sleep(1),
+        sleep(5),
         e_play(Difficulty, Board, Mv, Player, Mv2, Line, Column, Pair),
         next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, _), !.
 
@@ -242,8 +238,10 @@ e_play(_, Board, Mv, Player, _, LineC, ColumnC, PairC):-
 e_play(_, Board, Mv, Player, _, LineC, ColumnC, PairC):-
         has_options(Board, Mv, Player, 0, LineC, ColumnC, PairC), !.
 
+
 random_piece(P) :- random(0, 2, Y), (Y = 0 -> P = 's'; Y = 1 -> P = 'm'; Y = 2 -> P = 'l').
 random_coords(C, L) :- random(0, 2, C), random(0, 2, L).
+
 
 analyze_board(0, _, _, _, _, _, _):-!, fail.
 
@@ -258,38 +256,44 @@ analyze_board(N, Board, Player, Mv, LineC, ColumnC, PairC) :-
         N1 is N-1, !,
         analyze_board(N1, Board, Player, Mv, LineC, ColumnC, PairC).
 
+
 play_tier(Tier, _, _, _, _, _, _):-
         not(tier(Tier)), !, fail.
 
 play_tier(Tier, Board, Mv, Player, LineC, ColumnC, PairC):-
         tier_pieces(Tier, Elems),
-        play_tier_elems(Elems, Board, Mv, Player, LineC, ColumnC, PairC), !.
+        possible_tier_pieces(Board, Mv, Player, Elems, PossibleElems),
+        PossibleElems \= [], !,
+        random_elem(PossibleElems, Elem),
+        Elem = (Piece, LineC, ColumnC),
+        equal_pair((Piece, Player), PairC).
 
 play_tier(Tier, Board, Mv, Player, LineC, ColumnC, PairC):-
-        T1 is Tier + 1, !,
+        !, T1 is Tier+1,
         play_tier(T1, Board, Mv, Player, LineC, ColumnC, PairC).
 
-play_tier_elems([], _, _, _, _, _, _):-!, fail.
 
-play_tier_elems([Element|_], Board, Mv, Player, LineC, ColumnC, PairC):-
-        Element = (Piece, Line, Column),
-        replace_board(Board, Line, Column, (Piece, Player), _),
-        remove_piece(Mv, Piece, _), !,
-        equal_pair((Piece, Player), PairC),
-        equal_line(Line, LineC),
-        equal_column(Column, ColumnC).
+possible_tier_pieces(_, _, _, [], []).
 
-play_tier_elems([_|T], Board, Mv, Player, LineC, ColumnC, PairC):-
-        !, play_tier_elems(T, Board, Mv, Player, LineC, ColumnC, PairC).
+possible_tier_pieces(Board, Mv, Player, [H|T], [H|R]):-
+    H = (Piece, Line, Column),
+    replace_board(Board, Line, Column, (Piece, Player), _),
+    remove_piece(Mv, Piece, _), !,
+    possible_tier_pieces(Board, Mv, Player, T, R).
 
-random_tier_elem(Tier, Element):-
-        tier_pieces(Tier, Pieces),
-        length(Pieces, N),
-        random(0, N, Element).
+possible_tier_pieces(Board, Mv, Player, [_|T], R):-
+    !, possible_tier_pieces(Board, Mv, Player, T, R).
+
+
+random_elem(Elements, Elem):-
+        length(Elements, N),
+        random(0, N, X),
+        element_position(Elements, X, Elem).
 
 
 next_win(Board, Mv, Player, Line, Column, Pair):-
         win_board(Board, Mv, Player, 0, Line, Column, Pair).
+
 
 win_board(_, _, _, 3, _, _, _):-!, fail.
 
@@ -301,6 +305,7 @@ win_board(Board, Mv, Player, Line, LineC, ColumnC, PairC):-
         L1 is Line + 1, !,
         win_board(Board, Mv, Player, L1, LineC, ColumnC, PairC).
 
+
 win_line(_, _, _, _, 3, _, _):-!, fail.
 
 win_line(Board, Mv, Player, Line, Column, Column2, Pair):-
@@ -310,6 +315,7 @@ win_line(Board, Mv, Player, Line, Column, Column2, Pair):-
 win_line(Board, Mv, Player, Line, Column, Column2, Pair):-
         C1 is Column + 1, !,
         win_line(Board, Mv, Player, Line, C1, Column2, Pair).
+
 
 win_position(Board, Line, Column, Pair, Mv, Pair2):-
         replace_board(Board, Line, Column, Pair, Board2),
@@ -325,9 +331,11 @@ win_position(Board, Line, Column, Pair, Mv, Pair2):-
 
 win_position(_, _, _, _, _, _):-fail.
 
+
 next_piece(s, m, 1).
 next_piece(m, l, 2).
 next_piece(_, _, _):-fail.
+
 
 has_options(_, _, _, 3, _, _, _):-!, fail.
 
@@ -338,6 +346,7 @@ has_options(Board, Mv, Player, Line, LineC, ColumnC, PairC):-
         L1 is Line + 1, !,
         has_options(Board, Mv, Player, L1, LineC, ColumnC, PairC).
 
+
 has_options_line(_, _, _, _, 3, _, _):-!, fail.
 
 has_options_line(Board, Mv, Player, Line, Column, Column, PairC):-
@@ -346,6 +355,7 @@ has_options_line(Board, Mv, Player, Line, Column, Column, PairC):-
 has_options_line(Board, Mv, Player, Line, Column, ColumnC, PairC):-
         C1 is Column + 1, !,
         has_options_line(Board, Mv, Player, Line, C1, ColumnC, PairC).
+
 
 has_options_position(Board, Line, Column, Pair, Mv, Pair):-
         replace_board(Board, Line, Column, Pair, _),
@@ -377,12 +387,13 @@ end_game(Board, Player):-
 
 end_game(_, _).
 
-verify_movable_pieces(Board, Player1, Player2, Mv1, Mv2):-
+
+has_movable_pieces(Board, Player1, Player2, Mv1, Mv2):-
         ( not(verify_pieces(Mv1)) ; not(verify_pieces(Mv2)) ;
                 not(has_options(Board, Mv1, Player1, 0, _, _, _)) ; not(has_options(Board, Mv2, Player2, 0, _, _, _))
         ), !.
 
-verify_movable_pieces(Board, _, _, _, _):-
+has_movable_pieces(Board, _, _, _, _):-
         display_board(Board),
         nl,
         write('------------------------------'), nl,
@@ -392,6 +403,7 @@ verify_movable_pieces(Board, _, _, _, _):-
         nl,
         sleep(5), !, fail.
 
+
 verify_pieces([]).
 
 verify_pieces([H|_]):-
@@ -399,6 +411,7 @@ verify_pieces([H|_]):-
 
 verify_pieces([_|T]):-
         !, verify_pieces(T).
+
 
 verify_diagonal(Board, Player):-
         element_board(Board, 0, 0, Position1),
@@ -411,6 +424,7 @@ verify_diagonal(Board, Player):-
         element_board(Board, 1, 1, Position2),
         element_board(Board, 0, 2, Position3),
         equal_pieces(Position1, Position2, Position3, Player).
+
 
 verify_columns(Board, Player):-
         not(verify_column(Board, Player, 0)),
@@ -425,6 +439,7 @@ verify_column(Board, Player, Column):-
         element_board(Board, Column, 1, Position2),
         element_board(Board, Column, 2, Position3),
         column_pieces(Position1, Position2, Position3, Player).
+
 
 column_pieces([(m, Player)|_], Position3, (Piece, Player)):-
         !, equal_pieces(Position3, (Piece, Player)).
@@ -601,6 +616,30 @@ draw_piece( (T, C), B ):-
 
 draw_piece( _, _ ):- write(' ').
 
+display_mv(Mv):-
+  nl, write('--------------------'),
+  nl, write('  Available pieces'),
+  nl, nl, display_mv_info(Mv),
+  nl, write('--------------------').
+
+display_mv_info([]).
+
+display_mv_info([H|T]):-
+  !, display_type_info(H),
+  display_mv_info(T).
+
+display_type_info((N, Type)):-
+  write('-> '), write(N),
+  Type = s,
+  write(' small pieces'), nl.
+
+display_type_info((_, Type)):-
+  Type = m,
+  write(' medium pieces'), nl.
+
+display_type_info((_, Type)):-
+  Type = l,
+  write(' large pieces'), nl.
 
 display_board(B):- !, cls, write('     a       b       c'), nl,
         dB(1, B).
