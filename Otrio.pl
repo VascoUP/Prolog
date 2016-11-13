@@ -36,7 +36,7 @@ movable_pieces(r, [
                         (6, m),
                         (6, l)
                   ]).
-				  
+
 %%Player b movable pieces
 movable_pieces(b, [
                         (6, s),
@@ -429,13 +429,19 @@ verify_diagonal(Board, Player):-
         element_board(Board, 0, 0, Position1),
         element_board(Board, 1, 1, Position2),
         element_board(Board, 2, 2, Position3),
-        equal_pieces(Position1, Position2, Position3, Player).
+        verify_diagonal(Position1, Position2, Position3, Player).
 
 verify_diagonal(Board, Player):-
         element_board(Board, 2, 0, Position1),
         element_board(Board, 1, 1, Position2),
         element_board(Board, 0, 2, Position3),
-        equal_pieces(Position1, Position2, Position3, Player).
+        verify_diagonal(Position1, Position2, Position3, Player).
+
+verify_diagonal(Position1, Position2, Position3, Player):-
+  equal_pieces(Position1, Position2, Position3, Player).
+
+verify_diagonal(Position1, Position2, Position3, Player):-
+  ascending_pieces(Position1, Position2, Position3, Player).
 
 
 verify_columns(Board, Player):-
@@ -561,6 +567,34 @@ equal_pieces([(Piece, Player)|_], Position2, Position3, Player):-
 
 equal_pieces([_|T], Position2, Position3, Player):-
         equal_pieces(T, Position2, Position3, Player).
+
+
+ascending_pieces([], _):-fail.
+
+ascending_pieces([Piece|_], Piece2):-
+        Piece = (Type, Player),
+        Piece2 = (Type2, Player),
+        wanted_piece(Type, Type2), !,
+        write('Yes'), nl.
+
+ascending_pieces([_|T], Piece):-
+        !, ascending_pieces(T, Piece).
+
+ascending_pieces([], _, _):-fail.
+
+ascending_pieces([(m, Player)|_], Position3, (Type, Player)):-
+        ascending_pieces(Position3, (Type, Player)).
+
+ascending_pieces([_|T], Position3, Piece):-
+        !, ascending_pieces(T, Position3, Piece).
+
+ascending_pieces([_], _, _, _):-fail.
+
+ascending_pieces([(Piece, Player)|_], Position2, Position3, Player):-
+        ascending_pieces(Position2, Position3, (Piece, Player)).
+
+ascending_pieces([_|T], Position2, Position3, Player):-
+        !, ascending_pieces(T, Position2, Position3, Player).
 
 
 element_board([H|_], C, 0, Position):-
