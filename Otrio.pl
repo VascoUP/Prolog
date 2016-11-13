@@ -15,7 +15,7 @@ difficulty(easy).
 difficulty(hard).
 
 
-pieces( [s, m , l ] ).
+pieces( [s, m , l, e] ).
 
 
 tier(1).
@@ -44,7 +44,7 @@ movable_pieces(b, [
 
 board( [
          [ [e, e, e], [e, e, e], [e, e, e] ],
-         [ [e, e, e], [e, e, e], [e, e, e] ],
+         [ [e, e, e], [(s,r), (m,r), (l,r)], [e, e, e] ],
          [ [e, e, e], [e, e, e], [e, e, e] ]
              ]).
 
@@ -68,9 +68,9 @@ game_cicle(ModeGame1, ModeGame2, Difficulty):-
 %% Mv1 are the available pieces of the current player
 %% Mv2 are the available pieces of the other player
 cicle(Board, Player, Mv1, Mv2, ModeGame1, ModeGame2, Difficulty):-
-        print_player(Player),
         display_board(Board),
 
+        print_player(Player),
         nl, write('---------------------------'),
         nl, write('      Avaiable pieces      '), nl,
         nl, write(Mv1), nl,
@@ -78,14 +78,16 @@ cicle(Board, Player, Mv1, Mv2, ModeGame1, ModeGame2, Difficulty):-
         nl,
 
         play(ModeGame1, Difficulty, Board, Player, Mv1, Mv2, Board2, PlayerC, Mv1C, Mv2C, Replay), !,
-        not(end_game(Board2, Player)), !,
+        not(cicle_end_game(Board2, Player)), !,
         next_player(PlayerC, Pl2),
         verify_movable_pieces(Board2, PlayerC, Pl2, Mv1C, Mv2C), nl, !,
         (
                 ( not(Replay), not(verify_pieces(Mv1C)), has_options(Board2, Mv1C, Player2, 0, _, _, _) ) ->
+                        write('Played'), nl,
                         equal_player(PlayerC, Player2), equal_mv(Mv1C, NextMv1), equal_mv(Mv2C, NextMv2),
                         equal_mode(ModeGame2, NextMode1), equal_mode(ModeGame1, NextMode2)
                 ;
+                        write('Not Played'), nl,
                         equal_player(Player, Player2), equal_mv(Mv2C, NextMv1), equal_mv(Mv1C, NextMv2),
                         equal_mode(ModeGame1, NextMode1), equal_mode(ModeGame2, NextMode2)
         ), cicle(Board2, Player2, NextMv1, NextMv2, NextMode1, NextMode2, Difficulty).
@@ -96,6 +98,7 @@ play(player, _, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, Replay):-
         next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, Replay), !.
 
 play(computer, Difficulty, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, false):-
+        sleep(1),
         e_play(Difficulty, Board, Mv, Player, Mv2, Line, Column, Pair),
         next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, _), !.
 
@@ -218,7 +221,7 @@ remove_piece(L, _, L):-fail.
 
 %% Exclusive to the easy mode
 e_play(easy, Board, Mv, Player, _, LineC, ColumnC, PairC):-
-        random(0, 100, X), X < 50, !,
+        random(0, 100, X), X < 50,
         next_win(Board, Mv, Player, LineC, ColumnC, PairC), !.
 
 %% Exclusive to the hard mode
@@ -361,27 +364,33 @@ has_options_position(_, _, _, _, _, _):-!, fail.
 %% VERIFY END GAME
 %%-----------------
 
+cicle_end_game(Board, Player):-
+  !, end_game(Board, Player),
+  print_win(Board, Player).
+
+
 end_game(Board, Player):-
         not(verify_diagonal(Board, Player)),
         not(verify_columns(Board, Player)),
         not(verify_board(Board, Player)), !,
         fail.
 
-end_game(_, _):-!.
+end_game(_, _).
 
 verify_movable_pieces(Board, Player1, Player2, Mv1, Mv2):-
         ( not(verify_pieces(Mv1)) ; not(verify_pieces(Mv2)) ;
                 not(has_options(Board, Mv1, Player1, 0, _, _, _)) ; not(has_options(Board, Mv2, Player2, 0, _, _, _))
         ), !.
 
-verify_movable_pieces(_, _, _, _, _):-
+verify_movable_pieces(Board, _, _, _, _):-
+        display_board(Board),
         nl,
         write('------------------------------'), nl,
         write('Unable to play any more pieces'), nl,
         write('            DRAW'), nl,
         write('------------------------------'), nl,
         nl,
-        sleep(2), !, fail.
+        sleep(5), !, fail.
 
 verify_pieces([]).
 
@@ -426,43 +435,56 @@ column_pieces([_|T], Position3, (Piece, Player)):-
 column_pieces([_], _, _, _):-fail.
 
 column_pieces([(Piece, Player)|_], Position2, Position3, Player):-
-        wanted_piece(Piece, Piece2),
+        wanted_piece(Piece, Piece2), Piece2 \= e,
         column_pieces(Position2, Position3, (Piece2, Player)).
 
 column_pieces([_|T], Position2, Position3, Player):-
         column_pieces(T, Position2, Position3, Player).
 
+
 %% Verifies position and lines
 verify_board([], _):-!, fail.
 
-verify_board([H|T], Player):-
-        not(verify_line(H, 0, Player)), !,
-        verify_board(T, Player), !.
+verify_board([H|_], Player):-
+        verify_line_positions(H, Player), !.
 
-verify_board(_, _).
+verify_board([H|_], Player):-
+        verify_line(H, 0, Player), !.
+
+verify_board([_|T], Player):-
+        !, verify_board(T, Player).
+
+
+verify_line_positions([ ], _):-!, fail.
+
+verify_line_positions([H|_], Player):-
+        verify_position(H, Player), !.
+
+verify_line_positions([_|T], Player):-
+        verify_line_positions(T, Player).
+
 
 verify_position(Position, Player):-
         count_player_pieces(Position, Player, Counter),
         Counter = 3, !.
 
-verify_line([], _, _):-!, fail.
 
-verify_line([H|_], _, Player):-
-        verify_position(H,Player).
+verify_line([], _, _):-!, fail.
 
 verify_line([H|T], 0, Player):-
         line_win_position([H|T], 0, H, Player).
 
 verify_line([H|T], 1, (Piece, Player)):-
-        member((m, Player), H),
-        verify_line(T, 2, (Piece, Player)), !.
+        !, member((m, Player), H),
+        verify_line(T, 2, (Piece, Player)).
 
 verify_line([H|_], 2, Piece):-
         member(Piece, H).
 
 verify_line(_, _, _):-!, fail.
 
-line_win_position(_, _, [], _):-fail.
+
+line_win_position(_, _, [], _):-!, fail.
 
 line_win_position([_|T], Counter, [H|_], Player):-
         H = (Piece, Player),
@@ -473,11 +495,13 @@ line_win_position([_|T], Counter, [H|_], Player):-
 line_win_position(Line, Counter, [_|T], Player):-
         !, line_win_position(Line, Counter, T, Player).
 
+
 wanted_piece(s, l).
 
 wanted_piece(l, s).
 
 wanted_piece(_, _):-fail.
+
 
 count_player_pieces([], _, 0).
 
@@ -486,6 +510,7 @@ count_player_pieces([H|T], Player, Counter):-
 
 count_player_pieces([H|T], Player, Counter):-
         H \= (_, Player), count_player_pieces(T, Player, C1), Counter is C1.
+
 
 equal_pieces([], _):-fail.
 
@@ -539,6 +564,22 @@ equal_column(Column, Column).
 %% DRAW BOARD
 %% -----------
 
+print_win(Board, Player):-
+  !, display_board(Board),
+  print_win_player(Player), sleep(5).
+
+print_win_player(Player):-
+  Player = r, !,
+  nl, write('* PLAYER '),
+  write('RED '),
+  write('WON THE GAME *'), nl, nl.
+
+print_win_player(_):-
+  nl, write('* PLAYER '),
+  write('BLUE '),
+  write('WON THE GAME *'), nl, nl.
+
+
 print_player(Player):-
         Player = r, !,
         nl, write('     * RED TURN * '), nl, nl.
@@ -546,9 +587,6 @@ print_player(Player):-
 print_player(Player):-
         Player = b, !,
         nl, write('     * BLUE TURN * '), nl, nl.
-
-print_player(_):-
-        nl, write('     ERROR'), nl, nl.
 
 
 draw_piece( (T, C), B ):-
@@ -564,7 +602,7 @@ draw_piece( (T, C), B ):-
 draw_piece( _, _ ):- write(' ').
 
 
-display_board(B):- write('     a       b       c'), nl,
+display_board(B):- !, cls, write('     a       b       c'), nl,
         dB(1, B).
 
 

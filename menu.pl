@@ -24,7 +24,7 @@ logo:-          write('|                                                        
 
 
 
-mainMenu:-      cls,
+mainMenu:-      !, cls,
                                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                                 write('|                                                                                 |'), nl,
                                 logo,
@@ -41,12 +41,12 @@ mainMenu:-      cls,
                 write('|                                                                                 |'), nl,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                 nl, write('Option: '), get_char(R), get_char(_),
-                (R = '1' -> playMenu;
-                                 R = '2' -> gameRules;
-                                 R = '3' -> exitGame;
-                                 mainMenu).
+                (R = '1' -> !, playMenu;
+                 R = '2' -> !, gameRules;
+                 R = '3' -> !, exitGame;
+                 !, mainMenu).
 
-playMenu:-      cls,
+playMenu:-      !, cls,
                                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                 write('|                                                                                 |'), nl,
                 write('|                                                                                 |'), nl,
@@ -59,13 +59,13 @@ playMenu:-      cls,
                 write('|                                                                                 |'), nl,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                 nl, write('Option: '), get_char(G), get_char(_),
-                (G = '1' -> cls, game_cicle(player, player, _);
-                                 G = '2' -> cls, difficultyMenuPVC;
-                                 G = '3' -> cls, difficultyMenuCVC;
-                                 G = '4' -> cls, mainMenu;
-                                 playMenu).
+                (G = '1' -> cls, not(game_cicle(player, player, _)), !, mainMenu;
+                                 G = '2' -> !, difficultyMenuPVC;
+                                 G = '3' -> !, difficultyMenuCVC;
+                                 G = '4' -> !, mainMenu;
+                                 !, playMenu).
 
-gameRules:-             cls,
+gameRules:-             !, cls,
                                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                                 write('|                                                                                 |'), nl,
                                 write('|                                                                                 |'), nl,
@@ -89,9 +89,9 @@ gameRules:-             cls,
                                 write('|                     Press enter to return to the main menu                      |'), nl,
                                 write('|                                                                                 |'), nl,
                                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-                                nl, get_char(_), cls, mainMenu.
+                                nl, get_char(_), !, mainMenu.
 
-difficultyMenuPVC:- cls, 
+difficultyMenuPVC:- !, cls,
                                         write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                                         write('|                                                                                 |'), nl,
                                         write('|                                                                                 |'), nl,
@@ -103,12 +103,14 @@ difficultyMenuPVC:- cls,
                                         write('|                                                                                 |'), nl,
                                         write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                                         nl, write('Option: '), get_char(G), get_char(_),
-                                                (G = '1' -> cls, random(0, 2, Y), (Y = 0 -> game_cicle(player, computer, easy); Y = 1 -> game_cicle(computer, player, easy));
-                                                 G = '2' -> cls, random(0, 1, Y), (Y = 0 -> game_cicle(player, computer, hard); Y = 1 -> game_cicle(computer, player, hard));
-                                                G = '3' -> cls, playMenu;
-                                                playMenu).
-                                                
-difficultyMenuCVC:- cls, 
+                                                (G = '1' -> random(0, 2, Y), (Y = 0 -> not( game_cicle(player, computer, easy) ), !, mainMenu;
+                                                  Y = 1 -> not( game_cicle(computer, player, easy) ) ), !, mainMenu;
+                                                  G = '2' -> random(0, 1, Y), (Y = 0 -> not( game_cicle(player, computer, hard) ), !, mainMenu;
+                                                  Y = 1 -> not( game_cicle(computer, player, hard) ) ), !, mainMenu;
+                                                  G = '3' -> !, cls, playMenu;
+                                                  !, playMenu).
+
+difficultyMenuCVC:- !, cls,
                                         write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                                         write('|                                                                                 |'), nl,
                                         write('|                                                                                 |'), nl,
@@ -120,8 +122,7 @@ difficultyMenuCVC:- cls,
                                         write('|                                                                                 |'), nl,
                                         write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                                         nl, write('Option: '), get_char(G), get_char(_),
-                                                (G = '1' -> cls, game_cicle(computer, computer, easy);
-                                                 G = '2' -> cls, game_cicle(computer, computer, hard);
-                                                G = '3' -> cls, playMenu;
-                                                playMenu).
-                                        
+                                                (G = '1' -> not( game_cicle(computer, computer, easy) ), !, mainMenu;
+                                                 G = '2' -> not( game_cicle(computer, computer, hard) ), !, mainMenu;
+                                                 G = '3' -> !, playMenu;
+                                                 !, playMenu).
