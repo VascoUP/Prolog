@@ -2,26 +2,33 @@
 :- use_module(library(system)).
 :- ensure_loaded('menu.pl').
 
+
 player(r).
 player(b).
+
 
 modeGame(player).
 modeGame(computer).
 
+
 difficulty(easy).
 difficulty(hard).
 
+
 pieces( [s, m , l ] ).
+
 
 tier(1).
 tier(2).
 tier(3).
+
 
 tier_pieces(1, [ (m, 1, 1) ]).
 tier_pieces(2, [ (m, 0, 0), (m, 2, 0) ]).
 tier_pieces(3, [ (m, 0, 1), (m, 1, 0) ]).
 tier_pieces(4, [ (s, 0, 0), (l, 0, 0), (s, 0, 2), (l, 0, 2),
                  (s, 2, 0), (l, 2, 0), (s, 2, 2), (l, 2, 2) ]).
+
 
 movable_pieces(r, [
                         (6, s),
@@ -33,6 +40,7 @@ movable_pieces(b, [
                         (6, m),
                         (6, l)
                   ]).
+
 
 board( [
          [ [e, e, e], [e, e, e], [e, e, e] ],
@@ -47,12 +55,15 @@ board( [
 
 not(Arg1):- \+ Arg1.
 
+
 otrio :- mainMenu.
+
 
 game_cicle(ModeGame1, ModeGame2, Difficulty):-
   board(Board), player(Player),
   get_movable_pieces(Player, Mv1, Mv2), !,
   cicle(Board, Player, Mv1, Mv2, ModeGame1, ModeGame2, Difficulty).
+
 
 %% Mv1 are the available pieces of the current player
 %% Mv2 are the available pieces of the other player
@@ -72,12 +83,26 @@ cicle(Board, Player, Mv1, Mv2, ModeGame1, ModeGame2, Difficulty):-
         verify_movable_pieces(Board2, PlayerC, Pl2, Mv1C, Mv2C), nl, !,
         (
                 ( not(Replay), not(verify_pieces(Mv1C)), has_options(Board2, Mv1C, Player2, 0, _, _, _) ) ->
-                        equal_player(PlayerC, Player2), next_mv(Mv1C, NextMv1), next_mv(Mv2C, NextMv2),
+                        equal_player(PlayerC, Player2), equal_mv(Mv1C, NextMv1), equal_mv(Mv2C, NextMv2),
                         equal_mode(ModeGame2, NextMode1), equal_mode(ModeGame1, NextMode2)
                 ;
-                        equal_player(Player, Player2), next_mv(Mv2C, NextMv1), next_mv(Mv1C, NextMv2),
+                        equal_player(Player, Player2), equal_mv(Mv2C, NextMv1), equal_mv(Mv1C, NextMv2),
                         equal_mode(ModeGame1, NextMode1), equal_mode(ModeGame2, NextMode2)
         ), cicle(Board2, Player2, NextMv1, NextMv2, NextMode1, NextMode2, Difficulty).
+
+
+play(player, _, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, Replay):-
+        p_play(Player, Line, Column, Pair),
+        next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, Replay), !.
+
+play(computer, Difficulty, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, false):-
+        e_play(Difficulty, Board, Mv, Player, Mv2, Line, Column, Pair),
+        next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, _), !.
+
+
+p_play(Player, LineC, ColumnC, PairC):-
+        ask_piece(Piece), !, ask_coords(ColumnC, LineC), !,
+        piece_to_player(Piece, Player, PairC).
 
 
 %%--------------------
@@ -95,25 +120,28 @@ next_cicle(Board, _, _, _, Board, Player, Player, Mv1, Mv2, NextMv1, NextMv2, tr
         nl, write('---------------------------------'),
         nl,
         sleep(2),
-        next_mv(Mv1, NextMv1),
-        next_mv(Mv2, NextMv2).
+        equal_mv(Mv1, NextMv1),
+        equal_mv(Mv2, NextMv2).
+
 
 next_player(Player, PlayerC, Mv2, Mv1C):-
         next_player(Player, PlayerC),
-        next_mv(Mv2, Mv1C).
+        equal_mv(Mv2, Mv1C).
 
 next_player(Player, Player, Mv1, Mv2, Mv1, Mv2).
 
-next_mv(Mv1, Mv1).
 
 next_player(Player, NextPlayer):-
         player(NextPlayer),
         NextPlayer \= Player, !.
 
+
 piece_to_player(Piece, Player, Pair):-
         player(Player), pTp(Piece, Player, Pair).
 
+
 pTp(Piece, Player, (Piece, Player)).
+
 
 get_movable_pieces(Player1, Mv1, Mv2):-
         movable_pieces(Player1, Mv1),
@@ -188,46 +216,27 @@ remove_piece(L, _, L):-fail.
 %% "AI"
 %%------
 
-play(player, _, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, Replay):-
-        p_play(Player, Line, Column, Pair),
-        next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, Replay), !.
-
-play(computer, Difficulty, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, false):-
-        write(Difficulty), nl,
-        e_play(Difficulty, Board, Mv, Player, Mv2, Line, Column, Pair),
-        next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, _), !.
-
-p_play(Player, LineC, ColumnC, PairC):-
-        ask_piece(Piece), !, ask_coords(ColumnC, LineC), !,
-        piece_to_player(Piece, Player, PairC).
-
 %% Exclusive to the easy mode
 e_play(easy, Board, Mv, Player, _, LineC, ColumnC, PairC):-
-        write('easy'), nl,
         random(0, 100, X), X < 50, !,
         next_win(Board, Mv, Player, LineC, ColumnC, PairC), !.
 
 %% Exclusive to the hard mode
 e_play(hard, Board, Mv, Player, _,  LineC, ColumnC, PairC):-
-        write('hard'), nl,
         next_win(Board, Mv, Player, LineC, ColumnC, PairC), !.
 
 e_play(_, Board, _, Player, Mv2, LineC, ColumnC, (Piece, Player)):-
-        write('?'), nl,
         next_player(Player, Player2),
         next_win(Board, Mv2, Player2, LineC, ColumnC, (Piece, _)), !.
 
 %% Exclusive to the hard mode
 e_play(hard, Board, Mv, Player, _, LineC, ColumnC, (Piece, Player)):-
-        write('hard'), nl,
         play_tier(1, Board, Mv, Player, LineC, ColumnC, (Piece, _)), !.
 
 e_play(_, Board, Mv, Player, _, LineC, ColumnC, PairC):-
-        write('?'), nl,
         analyze_board(50, Board, Player, Mv, LineC, ColumnC, PairC), !.
 
 e_play(_, Board, Mv, Player, _, LineC, ColumnC, PairC):-
-        write('?'), nl,
         has_options(Board, Mv, Player, 0, LineC, ColumnC, PairC), !.
 
 random_piece(P) :- random(0, 2, Y), (Y = 0 -> P = 's'; Y = 1 -> P = 'm'; Y = 2 -> P = 'l').
@@ -275,11 +284,6 @@ random_tier_elem(Tier, Element):-
         length(Pieces, N),
         random(0, N, Element).
 
-equal_mode(ModeGame, ModeGame).
-equal_player(Player, Player).
-equal_pair(Pair, Pair).
-equal_line(Line, Line).
-equal_column(Column, Column).
 
 next_win(Board, Mv, Player, Line, Column, Pair):-
         win_board(Board, Mv, Player, 0, Line, Column, Pair).
@@ -519,6 +523,18 @@ element_position([_|T], C, Element):-
         C1 is C - 1, element_position(T, C1, Element).
 
 
+%%--------
+%% EQUALS
+%%--------
+
+equal_mode(ModeGame, ModeGame).
+equal_player(Player, Player).
+equal_mv(Mv, Mv).
+equal_pair(Pair, Pair).
+equal_line(Line, Line).
+equal_column(Column, Column).
+
+
 %% -----------
 %% DRAW BOARD
 %% -----------
@@ -531,9 +547,9 @@ print_player(Player):-
         Player = b, !,
         nl, write('     * BLUE TURN * '), nl, nl.
 
-
 print_player(_):-
         nl, write('     ERROR'), nl, nl.
+
 
 draw_piece( (T, C), B ):-
         player(C), C = r,
@@ -547,8 +563,10 @@ draw_piece( (T, C), B ):-
 
 draw_piece( _, _ ):- write(' ').
 
+
 display_board(B):- write('     a       b       c'), nl,
         dB(1, B).
+
 
 dB(N, [H|T]):-
   N =< 3, !,
@@ -559,6 +577,7 @@ dB(N, [H|T]):-
 
 dB(_,[]):-
   write('  -----------------------'), nl.
+
 
 display_line(L, N, B):-
         N = 3, !,
@@ -574,6 +593,7 @@ display_line(L, N, B):-
         display_line(L, N1, B).
 
 display_line(_, _, _).
+
 
 dL(N, _):- N > 5, nl.
 
