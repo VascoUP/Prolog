@@ -78,13 +78,11 @@ cicle(Board, Player, Mv1, Mv2, ModeGame1, ModeGame2, Difficulty):-
         next_player(PlayerC, Pl2),
         has_movable_pieces(Board2, PlayerC, Pl2, Mv1C, Mv2C), nl, !,
         (
-                ( not(Replay), not(verify_pieces(Mv1C)), has_options(Board2, Mv1C, Player2, 0, _, _, _) ) ->
-                        write('Played'), nl,
+                ( not(Replay), not(verify_pieces(Mv1C)), has_options(Board2, Mv1C, Pl2, 0, _, _, _) ) ->
                         equal_player(PlayerC, Player2), equal_mv(Mv1C, NextMv1), equal_mv(Mv2C, NextMv2),
                         equal_mode(ModeGame2, NextMode1), equal_mode(ModeGame1, NextMode2)
                 ;
-                        write('Not Played'), nl,
-                        equal_player(Player, Player2), equal_mv(Mv2C, NextMv1), equal_mv(Mv1C, NextMv2),
+                        equal_player(Player, Player2), equal_mv(Mv1C, NextMv1), equal_mv(Mv2C, NextMv2),
                         equal_mode(ModeGame1, NextMode1), equal_mode(ModeGame2, NextMode2)
         ), cicle(Board2, Player2, NextMv1, NextMv2, NextMode1, NextMode2, Difficulty).
 
