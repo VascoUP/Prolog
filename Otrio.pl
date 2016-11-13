@@ -2,27 +2,27 @@
 :- use_module(library(system)).
 :- ensure_loaded('menu.pl').
 
-
+%% Player type (r - red, b - blue)
 player(r).
 player(b).
 
-
+%% Game mode (We can play player vs player, player vs computer or computer vs computer)
 modeGame(player).
 modeGame(computer).
 
-
+%% Difficulty (player vs computer or computer vs computer can be played in the easy or hard mode)
 difficulty(easy).
 difficulty(hard).
 
-
+%% Different pieces (s - small, m - medium, l -large, e - blank space)
 pieces( [s, m , l, e] ).
 
-
+%% Different tiers distributed by importance
 tier(1).
 tier(2).
 tier(3).
 
-
+%% Different pieces for each tier
 tier_pieces(1, [ (m, 1, 1) ]).
 tier_pieces(2, [ (m, 0, 0), (m, 2, 0) ]).
 tier_pieces(3, [ (m, 0, 1), (m, 1, 0) ]).
@@ -30,18 +30,21 @@ tier_pieces(4, [ (s, 0, 0), (l, 0, 0), (s, 0, 2), (l, 0, 2),
                  (s, 2, 0), (l, 2, 0), (s, 2, 2), (l, 2, 2) ]).
 
 
+%%Player r movable pieces
 movable_pieces(r, [
                         (6, s),
                         (6, m),
                         (6, l)
                   ]).
+				  
+%%Player b movable pieces
 movable_pieces(b, [
                         (6, s),
                         (6, m),
                         (6, l)
                   ]).
 
-
+%%Empty board
 board( [
          [ [e, e, e], [e, e, e], [e, e, e] ],
          [ [e, e, e], [e, e, e], [e, e, e] ],
@@ -53,20 +56,21 @@ board( [
 %%  FUNCTIONS
 %%-----------------------
 
+%%Creation of predicate not
 not(Arg1):- \+ Arg1.
 
-
+%%"Main function"
 otrio :- mainMenu.
 
-
+%%Predicate that creates the game cicle
 game_cicle(ModeGame1, ModeGame2, Difficulty):-
   board(Board), player(Player),
   get_movable_pieces(Player, Mv1, Mv2), !,
   cicle(Board, Player, Mv1, Mv2, ModeGame1, ModeGame2, Difficulty).
 
-
 %% Mv1 are the available pieces of the current player
 %% Mv2 are the available pieces of the other player
+%% Creation of the cicle to play
 cicle(Board, Player, Mv1, Mv2, ModeGame1, ModeGame2, Difficulty):-
         display_board(Board),
 
@@ -86,6 +90,7 @@ cicle(Board, Player, Mv1, Mv2, ModeGame1, ModeGame2, Difficulty):-
                         equal_mode(ModeGame1, NextMode1), equal_mode(ModeGame2, NextMode2)
         ), cicle(Board2, Player2, NextMv1, NextMv2, NextMode1, NextMode2, Difficulty).
 
+%%Predicates that creates the turn of each player and allows them to play
 
 play(player, _, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, Replay):-
         p_play(Player, Line, Column, Pair),
@@ -150,21 +155,26 @@ get_movable_pieces(Player1, Mv1, Mv2):-
 %% INPUTS
 %%--------
 
+%%Asks the piece to put on the board
 ask_piece(P):-
         pieces(Ps), repeat,
         ask_pieceName('Piece: ', P), member(P, Ps), nl.
 
+%%Asks the coordinates to put the piece
 ask_coords(C, L):-
   repeat,
         ask_column('Column: ', C), C \= 'a', C \= 'b', C \= 'c' , nl,
         repeat,
         ask_line('Line: ', L), L > -1, L < 3, nl.
 
+%%Allows the user to choose the piece
 ask_pieceName(X, Y):- nl, write(X), nl, get_char(Y), get_char(_).
 
+%%Allows the user to choose the column
 ask_column(X, C):- nl, write(X), nl, get_char(Y), get_char(_),
                                         (Y = 'a' -> C = 0; Y = 'b' -> C = 1; Y ='c' -> C = 2).
 
+%%Allows the user yo choose the line
 ask_line(X, L):- nl, write(X), nl, get_char(Y), get_char(_),
                 (Y = '1' -> L = 0; Y = '2' -> L = 1; Y = '3' -> L = 2).
 
@@ -174,12 +184,16 @@ ask_line(X, L):- nl, write(X), nl, get_char(Y), get_char(_),
 %% MOVE PIECES
 %%-------------
 
+%%Replaces the current board with the new board with the piece chosen by the user
+
 replace_board([H|T], 0, C, P, [R|T]):- !, replace_line(H, C, P, R).
 
 replace_board([H|T], L, C, P, [H|R]):- L > -1, L1 is L-1, replace_board(T, L1, C, P, R), !.
 
 replace_board(L, _, _, _, _, L).
 
+
+%%Replaces the current line with the new line with the piece chosen by the user
 
 replace_line([H|T], 0, P, [R|T]):- P = (l, _), replace(H, 2, P, R).
 
@@ -191,7 +205,7 @@ replace_line([H|T], C, P, [H|R]):- C > -1, C1 is C - 1, replace_line(T, C1, P, R
 
 replace_line(L, _, _, _, L).
 
-
+%%Verifies if the game cell is occupied, if it is returns fail
 replace([H|T], 0, _, [_|T]):- H \= e, !, fail.
 
 replace([_|T], 0, P, [P|T]).
@@ -200,7 +214,7 @@ replace([H|T], I, P, [H|R]):- I > -1, NI is I-1, replace(T, NI, P, R), !.
 
 replace(L, _, _, L):-fail.
 
-
+%%Removes the piece chosen from the player list of pieces
 remove_piece([(N, Pr)|T], Piece, [(X, Pr)|T]):-
         Piece = Pr, N \= 0, !, X is N-1.
 
