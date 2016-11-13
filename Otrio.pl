@@ -18,8 +18,9 @@ tier(2).
 tier(3).
 
 tier_pieces(1, [ (m, 1, 1) ]).
-tier_pieces(2, [ (m, 0, 1), (m, 2, 1), (m, 1, 0), (m, 1, 2) ]).
-tier_pieces(3, [ (s, 0, 0), (l, 0, 0), (s, 0, 2), (l, 0, 2),
+tier_pieces(2, [ (m, 0, 0), (m, 2, 0) ]).
+tier_pieces(3, [ (m, 0, 1), (m, 1, 0) ]).
+tier_pieces(4, [ (s, 0, 0), (l, 0, 0), (s, 0, 2), (l, 0, 2),
                  (s, 2, 0), (l, 2, 0), (s, 2, 2), (l, 2, 2) ]).
 
 movable_pieces(r, [
@@ -192,7 +193,7 @@ play(player, _, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, Replay):-
         next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, Replay), !.
 
 play(computer, Difficulty, Board, Player, Mv, Mv2, BoardC, PlayerC, MvC, Mv2C, false):-
-        e_play(Difficulty, Board, Mv, Player, Line, Column, Pair),
+        e_play(Difficulty, Board, Mv, Player, Mv2, Line, Column, Pair),
         write(Player), nl, write(Line), nl, write(Column), nl, write(Pair), nl,
         next_cicle(Board, Line, Column, Pair, BoardC, Player, PlayerC, Mv, Mv2, MvC, Mv2C, _), !.
 
@@ -201,26 +202,26 @@ p_play(Player, LineC, ColumnC, PairC):-
         piece_to_player(Piece, Player, PairC).
 
 %% Exclusive to the easy mode
-e_play(easy, Board, Mv, Player, LineC, ColumnC, PairC):-
+e_play(easy, Board, Mv, Player, _, LineC, ColumnC, PairC):-
         random(0, 100, X), !, X < 50,
         next_win(Board, Mv, Player, LineC, ColumnC, PairC), !.
 
 %% Exclusive to the hard mode
-e_play(hard, Board, Mv, Player, LineC, ColumnC, PairC):-
+e_play(hard, Board, Mv, Player, _,  LineC, ColumnC, PairC):-
         next_win(Board, Mv, Player, LineC, ColumnC, PairC), !.
 
-e_play(_, Board, Mv, Player, LineC, ColumnC, (Piece, Player)):-
+e_play(_, Board, _, Player, Mv2, LineC, ColumnC, (Piece, Player)):-
         next_player(Player, Player2),
-        next_win(Board, Mv, Player2, LineC, ColumnC, (Piece, _)), !.
+        next_win(Board, Mv2, Player2, LineC, ColumnC, (Piece, _)), !.
 
 %% Exclusive to the hard mode
-e_play(hard, Board, Mv, Player, LineC, ColumnC, (Piece, Player)):-
+e_play(hard, Board, Mv, Player, _, LineC, ColumnC, (Piece, Player)):-
         play_tier(1, Board, Mv, Player, LineC, ColumnC, (Piece, _)), !.
 
-e_play(_, Board, Mv, Player, LineC, ColumnC, PairC):-
+e_play(_, Board, Mv, Player, _, LineC, ColumnC, PairC):-
         analyze_board(50, Board, Player, Mv, LineC, ColumnC, PairC), !.
 
-e_play(_, Board, Mv, Player, LineC, ColumnC, PairC):-
+e_play(_, Board, Mv, Player, _, LineC, ColumnC, PairC):-
         has_options(Board, Mv, Player, 0, LineC, ColumnC, PairC), !.
 
 random_piece(P) :- random(0, 2, Y), (Y = 0 -> P = 's'; Y = 1 -> P = 'm'; Y = 2 -> P = 'l').
@@ -240,7 +241,7 @@ analyze_board(N, Board, Player, Mv, LineC, ColumnC, PairC) :-
         analyze_board(N1, Board, Player, Mv, LineC, ColumnC, PairC).
 
 play_tier(Tier, _, _, _, _, _, _):-
-        Tier > 3, !, fail.
+        not(tier(Tier)), !, fail.
 
 play_tier(Tier, Board, Mv, Player, LineC, ColumnC, PairC):-
         tier_pieces(Tier, Elems),
