@@ -33,9 +33,9 @@ movable_pieces(b, [
                   ]).
 
 board( [
-         [ [(s,r), e, (l,r)], [e, (m,b), e], [(s,b), e, e] ],
-         [ [e, (m,r), e], [(s,r), (m,b), e], [e, e, e] ],
-         [ [e, e, (l,b)], [e, (m,r), e], [(s,b), e, e] ]
+         [ [e, e, e], [e, e, e], [e, e, e] ],
+         [ [e, e, e], [e, e, e], [e, e, e] ],
+         [ [e, e, e], [e, e, e], [e, e, e] ]
              ]).
 
 

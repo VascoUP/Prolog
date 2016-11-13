@@ -59,6 +59,8 @@ playMenu:-     	cls,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                 nl, write('Option: '), get_char(G), get_char(_),
                 (G = '1' -> cls, game_cicle(player, player, _);
+				 G = '2' -> cls, difficultyMenuPVC;
+				 G = '3' -> cls, difficultyMenuCVC;
 				 G = '4' -> cls, mainMenu;
 				 playMenu).
 
@@ -87,3 +89,38 @@ gameRules:-		cls,
 				write('|                                                                                 |'), nl,
 				write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
 				nl, get_char(_), cls, mainMenu.
+
+difficultyMenuPVC:- cls, 
+					write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
+					write('|                                                                                 |'), nl,
+					write('|                                                                                 |'), nl,
+					write('|                  Difficulty Human vs Computer:                                  |'), nl,
+					write('|                                                                                 |'), nl,
+					write('|                    1. Easy                                                      |'), nl,
+					write('|                    2. Hard                                                      |'), nl,
+					write('|                    3. Return                                                    |'), nl,
+					write('|                                                                                 |'), nl,
+					write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
+					nl, write('Option: '), get_char(G), get_char(_),
+						(G = '1' -> cls, game_cicle(player, computer, easy);
+						 G = '2' -> cls, game_cicle(player, computer, hard);
+						G = '3' -> cls, playMenu;
+						playMenu).
+						
+difficultyMenuCVC:- cls, 
+					write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
+					write('|                                                                                 |'), nl,
+					write('|                                                                                 |'), nl,
+					write('|                  Difficulty Computer vs Computer:                               |'), nl,
+					write('|                                                                                 |'), nl,
+					write('|                    1. Easy                                                      |'), nl,
+					write('|                    2. Hard                                                      |'), nl,
+					write('|                    3. Return                                                    |'), nl,
+					write('|                                                                                 |'), nl,
+					write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
+					nl, write('Option: '), get_char(G), get_char(_),
+						(G = '1' -> cls, game_cicle(player, player, _);
+						 G = '2' -> cls, difficultyMenuPVC;
+						G = '3' -> cls, playMenu;
+						playMenu).
+					
