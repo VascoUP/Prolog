@@ -51,7 +51,7 @@ mainMenu:-      !, cls,
                  R = '2' -> !, gameRules;
                  R = '3' -> !, credits;
                  R = '4' -> !, exitGame;
-                 !, mainMenu).
+                 !, mainMenu), !.
 
 
 %% Predicate that creates the game mode menu
@@ -72,7 +72,7 @@ playMenu:-      !, cls,
                  G = '2' -> !, difficultyMenuPVC;
                  G = '3' -> !, difficultyMenuCVC;
                  G = '4' -> !, mainMenu;
-                 !, playMenu).
+                 !, playMenu), !.
 
 
 %% Predicate that created the game rules
@@ -100,7 +100,7 @@ gameRules:-     !, cls,
                 write('|                     Press ENTER to return to the main menu                      |'), nl,
                 write('|                                                                                 |'), nl,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-                nl, get_char(_), !, mainMenu.
+                nl, get_char(_), !, mainMenu, !.
 
 
 %% Predicate that creates the Human vs Computer difficulty menu
@@ -120,8 +120,8 @@ difficultyMenuPVC:- !, cls,
                                                   Y = 1 -> not( game_cicle(computer, player, easy) ) ), !, mainMenu;
                      G = '2' -> random(0, 1, Y), (Y = 0 -> not( game_cicle(player, computer, hard) ), !, mainMenu;
                                                   Y = 1 -> not( game_cicle(computer, player, hard) ) ), !, mainMenu;
-                     G = '3' -> !, cls, playMenu;
-                     !, playMenu).
+                     G = '3' -> !, playMenu;
+                     !, playMenu), !.
 
 
 %% Predicate that creates the Computer vs Computer difficulty menu
@@ -140,11 +140,11 @@ difficultyMenuCVC:- !, cls,
                     (G = '1' -> not( game_cicle(computer, computer, easy) ), !, mainMenu;
                      G = '2' -> not( game_cicle(computer, computer, hard) ), !, mainMenu;
                      G = '3' -> !, playMenu;
-                     !, playMenu).
+                     !, playMenu), !.
 
 
 %% Predicate that creates the game credits
-credits:- cls,
+credits:- !, cls,
           write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
           write('|                                                                                 |'), nl,
           write('|                                                                                 |'), nl,
@@ -156,4 +156,4 @@ credits:- cls,
           write('|                             Press ENTER to return                               |'), nl,
           write('|                                                                                 |'), nl,
           write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-          get_char(_), mainMenu.
+          get_char(_), !, mainMenu, !.
