@@ -39,7 +39,7 @@ mainMenu:-     	cls,
                 write('|                   3. Exit                                                       |'), nl,
                 write('|                                                                                 |'), nl,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-                nl, write('Option: '), get_char(R), get_char(_), 
+                nl, write('Option: '), get_char(R), get_char(_),
                 (R = '1' -> playMenu;
 				 R = '2' -> gameRules;
 				 R = '3' -> exitGame;
@@ -58,7 +58,7 @@ playMenu:-     	cls,
                 write('|                                                                                 |'), nl,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                 nl, write('Option: '), get_char(G), get_char(_),
-                (G = '1' -> cls, game_cicle;
+                (G = '1' -> cls, game_cicle(player, player, _);
 				 G = '4' -> cls, mainMenu;
 				 playMenu).
 
@@ -86,4 +86,4 @@ gameRules:-		cls,
 				write('|                     Press enter to return to the main menu                      |'), nl,
 				write('|                                                                                 |'), nl,
 				write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
-				nl, get_char(_), cls, mainMenu.		
+				nl, get_char(_), cls, mainMenu.
