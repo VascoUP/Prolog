@@ -521,7 +521,7 @@ print_player(Player):-
 
 print_player(Player):-
         Player = b, !,
-        nl, write('      * BLUE TURN * '), nl, nl.
+        nl, write('     * BLUE TURN * '), nl, nl.
 
 
 print_player(_):-
