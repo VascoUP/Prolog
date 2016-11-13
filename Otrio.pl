@@ -456,8 +456,13 @@ verify_column(Board, Player, Column):-
         element_board(Board, Column, 0, Position1),
         element_board(Board, Column, 1, Position2),
         element_board(Board, Column, 2, Position3),
-        column_pieces(Position1, Position2, Position3, Player).
+        verify_column(Position1, Position2, Position3, Player).
 
+verify_column(Position1, Position2, Position3, Player):-
+  equal_pieces(Position1, Position2, Position3, Player).
+
+verify_column(Position1, Position2, Position3, Player):-
+  ascending_pieces(Position1, Position2, Position3, Player).
 
 column_pieces([(m, Player)|_], Position3, (Piece, Player)):-
         !, equal_pieces(Position3, (Piece, Player)).
