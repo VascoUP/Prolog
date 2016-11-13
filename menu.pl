@@ -4,9 +4,14 @@
 
 exitGame.
 
-cls :- write('\e[2J').
+cls :-
+  nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,
+  nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,
+  nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,
+  nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl.
 
-logo :-         write('|                                                                                 |'), nl,
+
+logo:-         	write('|                                                                                 |'), nl,
                 write('|       _ _ _ _      _ _ _ _ _ _      _ _ _       _ _ _ _ _ _       _ _ _ _       |'), nl,
                 write('|     /    _    \\   |           |   /  _ _  \\    |           |    /    _    \\     |'), nl,
                 write('|    |   /   \\   |  |_ _     _ _|  |  |   |  |   |_ _	  _ _|	 |   /   \\   |    |'), nl,
@@ -18,7 +23,7 @@ logo :-         write('|                                                        
                 write('|                                                                                 |'), nl.
 
 
-mainMenu :-     cls,
+mainMenu:-     	cls,
 				write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
 				write('|                                                                                 |'), nl,
 				logo,
@@ -40,7 +45,7 @@ mainMenu :-     cls,
 				 R = '3' -> exitGame;
 				 mainMenu).
 
-playMenu :-     cls,
+playMenu:-     	cls,
 				write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                 write('|                                                                                 |'), nl,
                 write('|                                                                                 |'), nl,
@@ -57,7 +62,7 @@ playMenu :-     cls,
 				 G = '4' -> cls, mainMenu;
 				 playMenu).
 
-gameRules :-	cls,
+gameRules:-		cls,
 				write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
 				write('|                                                                                 |'), nl,
 				write('|                                                                                 |'), nl,
