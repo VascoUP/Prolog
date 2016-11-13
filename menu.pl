@@ -2,18 +2,20 @@
 %%        MENUS
 %%-----------------------
 
-%%Predicate to exit the game
+%% Predicate to exit the game
 exitGame.
 
-%%Predicate to clear the screen (it does 60 new lines)
+
+%% Predicate to clear the screen (it does 60 new lines)
 cls :-
         nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,
         nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,
         nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,
         nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl,nl.
 
-%%Predicate that creates the game logo
-logo:-  
+
+%% Predicate that creates the game logo
+logo:-
         write('|                                                                                 |'), nl,
         write('|       _ _ _ _      _ _ _ _ _ _      _ _ _       _ _ _ _ _ _       _ _ _ _       |'), nl,
         write('|     /    _    \\   |           |   /  _ _  \\    |           |    /    _    \\     |'), nl,
@@ -26,7 +28,7 @@ logo:-
         write('|                                                                                 |'), nl.
 
 
-%%Predicate that creates the main menu
+%% Predicate that creates the main menu
 mainMenu:-      !, cls,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                 write('|                                                                                 |'), nl,
@@ -51,7 +53,8 @@ mainMenu:-      !, cls,
                  R = '4' -> !, exitGame;
                  !, mainMenu).
 
-%%Predicate that creates the game mode menu
+
+%% Predicate that creates the game mode menu
 playMenu:-      !, cls,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                 write('|                                                                                 |'), nl,
@@ -71,7 +74,8 @@ playMenu:-      !, cls,
                  G = '4' -> !, mainMenu;
                  !, playMenu).
 
-%%Predicate that created the game rules
+
+%% Predicate that created the game rules
 gameRules:-     !, cls,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                 write('|                                                                                 |'), nl,
@@ -98,7 +102,8 @@ gameRules:-     !, cls,
                 write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                 nl, get_char(_), !, mainMenu.
 
-%%Predicate that creates the Human vs Computer difficulty menu
+
+%% Predicate that creates the Human vs Computer difficulty menu
 difficultyMenuPVC:- !, cls,
                     write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                     write('|                                                                                 |'), nl,
@@ -118,7 +123,8 @@ difficultyMenuPVC:- !, cls,
                      G = '3' -> !, cls, playMenu;
                      !, playMenu).
 
-%%Predicate that creates the Computer vs Computer difficulty menu
+
+%% Predicate that creates the Computer vs Computer difficulty menu
 difficultyMenuCVC:- !, cls,
                     write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
                     write('|                                                                                 |'), nl,
@@ -136,7 +142,8 @@ difficultyMenuCVC:- !, cls,
                      G = '3' -> !, playMenu;
                      !, playMenu).
 
-%%Predicate that creates the game credits
+
+%% Predicate that creates the game credits
 credits:- cls,
           write(' - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - '), nl,
           write('|                                                                                 |'), nl,
