@@ -35,7 +35,7 @@ movable_pieces(b, [
 board( [
          [ [(s,r), e, (l,r)], [e, (m,b), e], [(s,b), e, e] ],
          [ [e, (m,r), e], [(s,r), (m,b), e], [e, e, e] ],
-         [ [(s,r), e, (l,b)], [e, (m,r), e], [(s,b), e, e] ]
+         [ [e, e, (l,b)], [e, (m,r), e], [(s,b), e, e] ]
              ]).
 
 
@@ -414,7 +414,7 @@ column_pieces([_|T], Position3, (Piece, Player)):-
 column_pieces([_], _, _, _):-fail.
 
 column_pieces([(Piece, Player)|_], Position2, Position3, Player):-
-        wanted_piece(Piece, Piece2), !,
+        wanted_piece(Piece, Piece2),
         column_pieces(Position2, Position3, (Piece2, Player)).
 
 column_pieces([_|T], Position2, Position3, Player):-
