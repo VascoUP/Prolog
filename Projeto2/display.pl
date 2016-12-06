@@ -1,10 +1,10 @@
 
 display_line([]) :- write('|'), nl.
 display_line([H|T]) :-
-        H = 0, write('|@'),
+        H \= 1, write('| @ '),
         !, display_line(T).
 display_line([_|T]) :-
-        write('| '),
+        write('|   '),
         !, display_line(T).
 
 display_board([]) :-
