@@ -169,39 +169,36 @@ get_square( Board, X, Y, Square ) :-
         
         % X+1 and Y
         X1 is X + 1,
-        nth1( Y, Board, H1 ),
         nth1( X1, H1, V2 ),
         
         % X and Y+1
         Y1 is Y + 1,
-        nth1( Y1, Board, H1 ),
-        nth1( X, H1, V3 ),
+        nth1( Y1, Board, H2 ),
+        nth1( X, H2, V3 ),
         
         % X+1 and Y+1
-        nth1( Y1, Board, H1 ),
-        nth1( X1, H1, V4 ), !,
+        nth1( X1, H2, V4 ), !,
         
         append( [V1, V2, V3, V4], [], Square ), write(Square).
 
 
 % sum_squares_cols( +Board, +X, +Y )
 sum_squares_cols( Board, X, Y ) :-
-        get_square( Board, X, Y, Square ),
-        !, X1 is X + 1,
-        sum(Square, #<, 2),
+        get_square( Board, X, Y, Square ), !,
+        X1 is X + 1,
+        sum(Square, #<, 2), !,
         sum_squares_cols( Board, X1, Y ).
-sum_squares_cols( _, _, _ ).
 
 % sum_squares( +Board, +X, +Y )
 sum_squares( Board, X, Y ) :-
-        sum_squares_cols( Board, X, Y ),
+        sum_squares_cols( Board, X, Y ), !,
         Y1 is Y + 1, !,
         sum_squares( Board, X, Y1 ).
 sum_squares( _, _, _ ).
 
 % sum_squares( +Board )
 sum_squares( Board ) :-
-        !, sum_squares( Board, 0, 0 ).
+        !, sum_squares( Board, 1, 1 ).
 
 
 % domain_board( +Board, +Min, +Max )
@@ -234,6 +231,7 @@ tents:-
         sum_lines(Board, Vals_Lines),
         sum_cols(Board, Vals_Cols),
         sum_squares(Board),
+        write("Oi"), nl,
         
         labeling_board(Board),
         
