@@ -24,7 +24,7 @@ create_lines(NCols, [_|R], [N|T]) :-
 add_trees([], _).
 add_trees([(X, Y)|Trees], Board) :-
         nth1(Y, Board, Line),
-        nth1(X, Line, 2), !,
+        nth1(X, Line, 0), !,
         add_trees(Trees, Board).
 
 
@@ -110,7 +110,7 @@ adjancent_values(X, Y, Board, Values) :-
         value_top(X, Y, Board, NValues2, NValues3),
         value_down(X, Y, Board, NValues3, Values), !.
 
-% all_values_around(-X, -Y, -Board, +Values) 
+% all_values_around(+X, +Y, +Board, -Values) 
 all_values_around(X, Y, Board, Values) :-
         adjancent_values(X, Y, Board, NValues),
         value_right_top(X, Y, Board, NValues, NValues1),
@@ -118,16 +118,124 @@ all_values_around(X, Y, Board, Values) :-
         value_right_down(X, Y, Board, NValues2, NValues3),
         value_left_down(X, Y, Board, NValues3, Values), !.
 
+
+% sum_trees( +Trees, +Board )
+sum_trees([], _):- !.
+sum_trees( [(X, Y) | Trees], Board ) :-
+        adjancent_values(X, Y, Board, Values),
+        sum( Values, #>, 0 ),
+        !, sum_trees( Trees, Board ).
+
+
+% sum_line( +Board, +Value, +Line )
+sum_line( Board, Value, Line ) :-
+        nth1( Line, Board, H ),
+        sum(H, #=, Value).
+
+% sum_lines( +Board, +Vals_Line )
+sum_lines( _, [] ).
+sum_lines( Board, [(Line, Value) | T] ) :-
+       sum_line( Board, Value, Line ),
+       !, sum_lines( Board, T ).
+
+
+% sum_col( +Board, +Value, +Column )
+sum_col( Board, Value, Column ) :-
+        findall(Col, (
+                        length(Board, Len), domain([NumLine], 1, Len), 
+                        nth1(NumLine, Board, Line), nth1(Column, Line, Col)), 
+                Vals),
+        sum(Vals, #=, Value).
+
+% sum_cols( +Board, +Vals_Cols )
+sum_cols( _, [] ).
+sum_cols( Board, [(Column, Value) | T] ) :-
+       sum_col( Board, Value, Column ),
+       !, sum_cols( Board, T ).
+
+
+% get_square( +Board, +X, +Y, -Square )
+get_square( Board, X, Y, Square ) :-
+        length( Board, LenY ),
+        nth1( 1, Board, L ),
+        length( L, LenX ), !,
         
+        LenY >= Y + 1,
+        LenX >= X + 1,
+        
+        % X and Y
+        nth1( Y, Board, H1 ),
+        nth1( X, H1, V1 ),
+        
+        % X+1 and Y
+        X1 is X + 1,
+        nth1( Y, Board, H1 ),
+        nth1( X1, H1, V2 ),
+        
+        % X and Y+1
+        Y1 is Y + 1,
+        nth1( Y1, Board, H1 ),
+        nth1( X, H1, V3 ),
+        
+        % X+1 and Y+1
+        nth1( Y1, Board, H1 ),
+        nth1( X1, H1, V4 ), !,
+        
+        append( [V1, V2, V3, V4], [], Square ), write(Square).
+
+
+% sum_squares_cols( +Board, +X, +Y )
+sum_squares_cols( Board, X, Y ) :-
+        get_square( Board, X, Y, Square ),
+        !, X1 is X + 1,
+        sum(Square, #<, 2),
+        sum_squares_cols( Board, X1, Y ).
+sum_squares_cols( _, _, _ ).
+
+% sum_squares( +Board, +X, +Y )
+sum_squares( Board, X, Y ) :-
+        sum_squares_cols( Board, X, Y ),
+        Y1 is Y + 1, !,
+        sum_squares( Board, X, Y1 ).
+sum_squares( _, _, _ ).
+
+% sum_squares( +Board )
+sum_squares( Board ) :-
+        !, sum_squares( Board, 0, 0 ).
+
+
+% domain_board( +Board, +Min, +Max )
+domain_board([], _, _).
+domain_board([H|T], Min, Max) :-
+        domain(H, Min, Max), !,
+        domain_board(T, Min, Max).
+
+% labeling_board( +Board )
+labeling_board([]).
+labeling_board([H|T]) :-
+        labeling([], H), !,
+        labeling_board(T).
+
+
 % tents
 tents:-
         trees(Trees),
-        vals_cls(_),
-        vals_lns(_), !,
+        vals_cls(Vals_Cols),
+        vals_lns(Vals_Lines), !,
         
         create_board(6, 6, Board),
         add_trees(Trees, Board),
-        fill_empty_board(Board),
+        
+        display_board(Board),
+        
+        domain_board(Board, 0, 1),
+        
+        sum_trees(Trees, Board),
+        sum_lines(Board, Vals_Lines),
+        sum_cols(Board, Vals_Cols),
+        sum_squares(Board),
+        
+        labeling_board(Board),
         
         display_board(Board).
 
@@ -170,48 +278,7 @@ arr_board([Line | Board], UndefinedVals) :-
         arr_line(Line, Un2),
         arr_board(Board, Un), !,
         append(Un2, Un, UndefinedVals).
-      
-% has_tree(-Elems)
-has_tree([]) :-  !, fail.
-has_tree([Elem | _]) :-
-        Elem \= 1,      % check wether the term is instanciated 
-        Elem = 2, !.
-has_tree([_ | Elems]) :-
-        !, has_tree(Elems).
-
-
-% fill_empty_line(-Board, -Y, -X)
-fill_empty_line(Board, Y, X) :-
-        nth1(Y, Board, Line),
-        length(Line, Len),
-        Len < X, !.
-fill_empty_line(Board, Y, X) :-
-        adjancent_values(X, Y, Board, Values), 
-        \+ has_tree(Values), 
-        value_position(X, Y, Board, 0),
-        X1 is X + 1,
-        fill_empty_line(Board, Y, X1).
-fill_empty_line(Board, Y, X) :-
-        X1 is X + 1,
-        fill_empty_line(Board, Y, X1).
-
-% fill_empty_line(-Board, -Y)
-fill_empty_line(Board, Y) :-
-        fill_empty_line(Board, Y, 1).
-
-% fill_empty_board(-Board, -Y)
-fill_empty_board(Board, Y) :-
-        length(Board, Len),
-        Len < Y, !.
-fill_empty_board(Board, Y) :-
-        fill_empty_line(Board, Y),
-        Y1 is Y + 1,
-        fill_empty_board(Board, Y1).
-
-% fill_empty_board(-Board)
-fill_empty_board(Board) :-
-        fill_empty_board(Board, 1).
-     
+   
 
 % sum_elem_line(-Board, -Y, -X)
 sum_trees_line(Board, Y, X) :-
@@ -267,7 +334,6 @@ sum_adj_tents_line(Board, Y, X) :-
         sum_values(UninstanciatedValues, #=, 0),
         
         X1 is X + 1, !,
-        write(X), write(' - '), write(Y), nl,
         sum_adj_tents_line(Board, Y, X1).
 sum_adj_tents_line(Board, Y, X) :- 
         X1 is X + 1, !,
@@ -295,9 +361,7 @@ sum_adj_tents_board(Board) :-
 verify_vals_cols(_, []).
 verify_vals_cols(Board, [(N, Val)|T]) :-
         findall(Col, (length(Board, Len), domain([NumLine], 1, Len), nth1(NumLine, Board, Line), nth1(N, Line, Col)), Column),
-        write(Column), nl,
         non_tree(Column, NonTree),
-        write(NonTree), nl,
         sum(NonTree, #=, Val), !,
         verify_vals_cols(Board, T).
 
@@ -308,8 +372,3 @@ verify_vals_lns(Board, [(N, Val)|T]) :-
         non_tree(Line, NonTree),
         sum(NonTree, #=, Val), !,
         verify_vals_cols(Board, T).
-
-domain_board([], _, _).
-domain_board([H|T], Min, Max) :-
-        domain(H, Min, Max), !,
-        domain_board(T, Min, Max).
