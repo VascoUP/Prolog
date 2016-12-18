@@ -2,11 +2,20 @@
 :- use_module(library(lists)).
 :- include('display.pl').
 
-vals_cls([(1, 3), (6, 1)]).
-vals_lns([(1, 2), (6, 2)]).
-trees([(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)]).
-
 % Tree -  0, tent - 1, empty space - 0
+
+
+%board_info(NCols, NLines, Trees, Vals_Cls, Vals_Lns)
+board_info(6, 6, 
+        [(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)],               %Trees
+        [(1, 3), (6, 1)],                                                               %Vals_Cls
+        [(1, 2), (6, 2)]).                                                              %Vals_Lns
+
+board_info(7, 7,
+        [(3, 1),(6, 1), (1, 2), (2, 3), (5, 3), (4, 5), (1, 6), (4, 6), (7, 7)],        %Trees
+        [(1, 1), (2, 2), (3, 1), (4, 2), (5, 1), (6, 1), (7, 1)],                       %Vals_Cls
+        [(1, 2), (2, 1), (3, 1), (4, 1), (5, 1), (6, 1), (7, 2)]).                      %Vals_Lns
+
 
 
 % ================================
@@ -15,16 +24,14 @@ trees([(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)]).
 
 %init_tents(-Board, -Trees, -Vals_Cls, -Vals_Lns)
 init_board(Board, Trees, Vals_Cls, Vals_Lns) :-
-        trees(Trees),
-        vals_cls(Vals_Cls),
-        vals_lns(Vals_Lns),
+        board_info(NCols, NLines, Trees, Vals_Cls, Vals_Lns),
         
-        create_board(6, 6, Board),
+        create_board(NCols, NLines, Board),
         add_trees(Trees, Board),
         fill_impossible_spaces(Board, Trees).
         
 % create_board(+NCols, +NLines, -Board)
-create_board(NLines, NCols, Board) :-
+create_board(NCols, NLines, Board) :-
         length(Board2, NLines),
         create_lines(NCols, Board2, Board).
 
@@ -86,48 +93,43 @@ fill_impossible_spaces(Board, TreeCoords) :-
 % ==== GET VALUES FROM BOARD ====
 % ===============================
 
-% element_position(-X, -Y, -Board, +Value)
-element_position(X, Y, Board, Value) :-
-        nth1(Y, Board, Line),
-        element(X, Line, Value), !.
-element_position(_, _, _, _) :- !, fail.
 
-% value_position(-X, -Y, -Board, +Value)
+% value_position(+X, +Y, +Board, -Value)
 value_position(X, Y, Board, Value) :-
         nth1(Y, Board, Line),
         nth1(X, Line, Value), !.
 value_position(_, _, _, _) :- !, fail.
 
 
-% value_right(-X, -Y, -Board, +Value)
+% value_right(+X, +Y, +Board, -Value)
 value_right(X, Y, Board, Values, NValues) :-
         X1 is X + 1,
         value_position(X1, Y, Board, Value),
         append([Value], Values, NValues), !.
 value_right(_, _, _, Values, Values).
 
-% value_left(-X, -Y, -Board, +Value)
+% value_left(+X, +Y, +Board, -Value)
 value_left(X, Y, Board, Values, NValues) :-
         X1 is X - 1,
         value_position(X1, Y, Board, Value),
         append([Value], Values, NValues), !.
 value_left(_, _, _, Values, Values).
 
-% value_top(-X, -Y, -Board, -Value, +NValues)
+% value_top(+X, +Y, +Board, -Value)
 value_top(X, Y, Board, Values, NValues) :-
         Y1 is Y - 1,
         value_position(X, Y1, Board, Value),
         append([Value], Values, NValues), !.
 value_top(_, _, _, Values, Values).
 
-% value_down(-X, -Y, -Board, +Value)
+% value_down(+X, +Y, +Board, -Value)
 value_down(X, Y, Board, Values, NValues) :-
         Y1 is Y + 1, 
         value_position(X, Y1, Board, Value),
         append([Value], Values, NValues), !.
 value_down(_, _, _, Values, Values).
 
-% value_bottom_right(-X, -Y, -Board, +Value)
+% value_bottom_right(+X, +Y, +Board, -Value)
 value_bottom_right(X, Y, Board, Values, NValues) :-
         Y1 is Y + 1,
         X1 is X + 1,
@@ -135,13 +137,13 @@ value_bottom_right(X, Y, Board, Values, NValues) :-
         append([Value], Values, NValues), !.
 value_bottom_right(_, _, _, Values, Values).
 
-% value_bottom_left(-X, -Y, -Board, +Value)
+% value_bottom_left(+X, +Y, +Board, -Value)
 value_pos(X, Y, Board, Values, NValues) :-
         value_position(X, Y, Board, Value),
         append([Value], Values, NValues), !.
 value_pos(_, _, _, Values, Values).
 
-% adjancent_values(-X, -Y, -Board, +Values) 
+% adjancent_values(+X, +Y, +Board, -Values) 
 adjancent_values(X, Y, Board, Values) :-
         value_right(X, Y, Board, [], NValues),
         value_left(X, Y, Board, NValues, NValues2),
@@ -228,13 +230,17 @@ sum_board(Board, TreeCoords) :-
         
 
 
-% domain_board( +Board, +Min, +Max )
+% ==============================
+% ============ MISC ============
+% ==============================
+
+% domain_board(+Board, +Min, +Max)
 domain_board([], _, _).
 domain_board([H|T], Min, Max) :-
         domain(H, Min, Max), !,
         domain_board(T, Min, Max).
 
-% labeling_board( +Board )
+% labeling_board(+Board)
 labeling_board([]).
 labeling_board([H|T]) :-
         labeling([], H), !,
