@@ -1,7 +1,10 @@
-
-%------------------
-% Needs total redo
-%-----------------
+% display_sep_line(+N)
+display_sep_line(0):-write('-'), nl.
+display_sep_line(N):-
+        write('----'),
+        
+        N1 is N-1,
+        display_sep_line(N1), !.
 
 % display_board(+Board, +TreeCoords, +Column, +Line)
 display_board(Board, TreeCoords, Column, Line) :-
@@ -9,6 +12,7 @@ display_board(Board, TreeCoords, Column, Line) :-
         Column > N,
         
         write('|'), nl,
+        display_sep_line(N),
         
         Line1 is Line + 1, !,        
         display_board(Board, TreeCoords, 1, Line1).
@@ -53,4 +57,9 @@ display_board(Board, TreeCoords, Column, Line) :-
         
 % display_board(+Board, +TreeCoords)
 display_board(Board, TreeCoords) :-
-       display_board(Board, TreeCoords, 1, 1). 
+       write('-->TENTS<--'), nl, nl,
+       
+       nth1(1, Board, L), length(L, N),
+       display_sep_line(N),
+       
+       display_board(Board, TreeCoords, 1, 1), nl, nl. 
