@@ -8,6 +8,11 @@ trees([(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)]).
 
 % Tree -  0, tent - 1, empty space - 0
 
+
+% ================================
+% ======= INITIALIZE BOARD =======
+% ================================
+
 % create_board(+NCols, +NLines, -Board)
 create_board(NLines, NCols, Board) :-
         length(Board2, NLines),
@@ -23,8 +28,7 @@ create_lines(NCols, [_|R], [N|T]) :-
 % add_trees(+TreeCoords, +Board, -BoardRes)
 add_trees([], _).
 add_trees([(X, Y)|Trees], Board) :-
-        nth1(Y, Board, Line),
-        nth1(X, Line, 0), !,
+        value_position(X, Y, Board, 0), !,
         add_trees(Trees, Board).
 
 
@@ -54,8 +58,7 @@ fill_impossible_spaces(Board, TreeCoords, Column, Line) :-
         \+ nth1(_, TreeCoords, (Column, Line1)),
         \+ nth1(_, TreeCoords, (Column, Line2)),
         % if it has no trees around this position then, this position, will never have a tent
-        nth1(Line, Board, L),
-        nth1(Column, L, 0), !,
+        value_position(Column, Line, Board, 0), !,
         fill_impossible_spaces(Board, TreeCoords, Column2, Line).
 
 fill_impossible_spaces(Board, TreeCoords, Column, Line) :-        
@@ -67,6 +70,11 @@ fill_impossible_spaces(Board, TreeCoords, Column, Line) :-
 fill_impossible_spaces(Board, TreeCoords) :-
         fill_impossible_spaces(Board, TreeCoords, 1, 1).
         
+
+
+% ===============================
+% ==== GET VALUES FROM BOARD ====
+% ===============================
 
 % element_position(-X, -Y, -Board, +Value)
 element_position(X, Y, Board, Value) :-
@@ -158,6 +166,11 @@ all_values_around(X, Y, Board, Values) :-
         value_right_down(X, Y, Board, NValues2, NValues3),
         value_left_down(X, Y, Board, NValues3, Values), !.
 
+
+
+% ================================
+% ========= RESTRICTIONS =========
+% ================================
 
 % sum_trees( +Trees, +Board )
 sum_trees([], _):- !.
@@ -254,6 +267,11 @@ labeling_board([H|T]) :-
         labeling_board(T).
 
 
+
+% ===============================
+% ============ TENTS ============
+% ===============================
+
 % tents
 tents:-
         trees(Trees),
@@ -277,137 +295,3 @@ tents:-
         labeling_board(Board),
         
         display_board(Board, Trees).
-
-
-
-% ---------------------
-%       TUDO MAL
-% ---------------------
-
-% non_tree(-Arr, +NonTree)
-non_tree([], []).
-non_tree([Val | Line], NonTree) :-
-        Val \= 3, 
-        Val = 2, !,
-        non_tree(Line, NonTree).
-non_tree([Val | Line], [Val | NonTree]) :-
-        !, non_tree(Line, NonTree).
-
-non_tree_board([], []).
-non_tree_board([Line | Board], NonTree) :-
-        non_tree(Line, Un2),
-        non_tree_board(Board, Un), !,
-        append(Un2, Un, NonTree).
-
-
-% arr_line(-Line, +UndefinedVal)
-arr_line([], []).
-arr_line([Val | Line], UndefinedVals) :-
-        Val \= 1, !,    % check wether the term is instanciated
-        arr_line(Line, UndefinedVals).
-arr_line([Val | Line], UndefinedVals) :-
-        Val \= 0, !, % check wether the term is instanciated
-        arr_line(Line, UndefinedVals).
-arr_line([Val | Line], [Val | UndefinedVals]) :-
-        !, arr_line(Line, UndefinedVals).
-        
-% arr_board(-Board, +UndefinedVals)
-arr_board([], []).
-arr_board([Line | Board], UndefinedVals) :-
-        arr_line(Line, Un2),
-        arr_board(Board, Un), !,
-        append(Un2, Un, UndefinedVals).
-   
-
-% sum_elem_line(-Board, -Y, -X)
-sum_trees_line(Board, Y, X) :-
-        nth1(Y, Board, Line),
-        length(Line, Len),
-        Len < X, !.
-sum_trees_line(Board, Y, X) :-
-        value_position(X, Y, Board, Value), 
-        Value = 2,
-        
-        adjancent_values(X, Y, Board, Values),
-        arr_line(Values, UninstanciatedValues),
-        sum_values(UninstanciatedValues, #>, 0),
-                
-        X1 is X + 1,
-        sum_trees_line(Board, Y, X1).
-sum_trees_line(Board, Y, X) :- 
-        X1 is X + 1,
-        sum_trees_line(Board, Y, X1).
-
-% sum_trees_line(-Board, -Y)
-sum_trees_line(Board, Y) :-
-        sum_trees_line(Board, Y, 1).
-
-% sum_trees_board(-Board, -Y)
-sum_trees_board(Board, Y) :-
-        length(Board, Len),
-        Len < Y, !.
-sum_trees_board(Board, Y) :-
-        sum_trees_line(Board, Y),
-        Y1 is Y + 1,
-        sum_trees_board(Board, Y1).
-
-% sum_trees_board(-Board)
-sum_trees_board(Board) :-
-        sum_trees_board(Board, 1).
-         
-sum_values([], _, _).
-sum_values(Values, Op, Res) :-
-        sum(Values, Op, Res).
-
-% sum_elem_line(-Board, -Y, -X)
-sum_adj_tents_line(Board, Y, X) :-
-        nth1(Y, Board, Line),
-        length(Line, Len),
-        Len < X, !.
-sum_adj_tents_line(Board, Y, X) :-
-        element_position(X, Y, Board, Value), 
-        Value #= 1, !,
-                
-        all_values_around(X, Y, Board, Values),
-        arr_line(Values, UninstanciatedValues),
-        sum_values(UninstanciatedValues, #=, 0),
-        
-        X1 is X + 1, !,
-        sum_adj_tents_line(Board, Y, X1).
-sum_adj_tents_line(Board, Y, X) :- 
-        X1 is X + 1, !,
-        sum_adj_tents_line(Board, Y, X1).
-
-% sum_trees_line(-Board, -Y)
-sum_adj_tents_line(Board, Y) :-
-        sum_adj_tents_line(Board, Y, 1).
-
-% sum_trees_board(-Board, -Y)
-sum_adj_tents_board(Board, Y) :-
-        length(Board, Len),
-        Len < Y, !.
-sum_adj_tents_board(Board, Y) :-
-        sum_adj_tents_line(Board, Y),
-        Y1 is Y + 1, !,
-        sum_adj_tents_board(Board, Y1).
-
-% sum_trees_board(-Board)
-sum_adj_tents_board(Board) :-
-        sum_adj_tents_board(Board, 1).
-
-
-% verify_vals_cols(-Board, -Vals_Cols)
-verify_vals_cols(_, []).
-verify_vals_cols(Board, [(N, Val)|T]) :-
-        findall(Col, (length(Board, Len), domain([NumLine], 1, Len), nth1(NumLine, Board, Line), nth1(N, Line, Col)), Column),
-        non_tree(Column, NonTree),
-        sum(NonTree, #=, Val), !,
-        verify_vals_cols(Board, T).
-
-% verify_vals_lns(-Board, -Vals_Lns)
-verify_vals_lns(_, []).
-verify_vals_lns(Board, [(N, Val)|T]) :-
-        nth1(N, Board, Line),
-        non_tree(Line, NonTree),
-        sum(NonTree, #=, Val), !,
-        verify_vals_cols(Board, T).
