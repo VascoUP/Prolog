@@ -6,27 +6,67 @@ vals_cls([(1, 3), (6, 1)]).
 vals_lns([(1, 2), (6, 2)]).
 trees([(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)]).
 
-% Tree -  2, tent - 1, empty space - 0
+% Tree -  0, tent - 1, empty space - 0
 
-% create_board(-NCols, -NLines, +Board)
+% create_board(+NCols, +NLines, -Board)
 create_board(NLines, NCols, Board) :-
         length(Board2, NLines),
         create_lines(NCols, Board2, Board).
 
-% create_lines(-NCols, -Board, +BoardRes)
+% create_lines(+NCols, +Board, -BoardRes)
 create_lines(_, [], []).
 create_lines(NCols, [_|R], [N|T]) :-
         length(N, NCols),
         !, create_lines(NCols, R, T).
 
 
-% add_trees(-TreeCoords, -Board, +BoardRes)
+% add_trees(+TreeCoords, +Board, -BoardRes)
 add_trees([], _).
 add_trees([(X, Y)|Trees], Board) :-
         nth1(Y, Board, Line),
         nth1(X, Line, 0), !,
         add_trees(Trees, Board).
 
+
+% fill_impossible_spaces(+Board, +TreeCoords, +Column, +Line)
+fill_impossible_spaces(Board, TreeCoords, Column, Line) :-
+        nth1(1, Board, L), length(L, N),
+        Column > N, % if the column is greater than the size of the line then we should move one line below
+        Line1 is Line + 1, !,
+        fill_impossible_spaces(Board, TreeCoords, 1, Line1).
+
+fill_impossible_spaces(Board, _, _, Line) :-
+        length(Board, N),
+        Line > N, !. % if the line is greater than the size of the board then we should end here
+
+fill_impossible_spaces(Board, TreeCoords, Column, Line) :-
+        nth1(_, TreeCoords, (Column, Line)), % if this position has a tree in it then we should move 2 position forward
+        Column1 is Column + 2, !,
+        fill_impossible_spaces(Board, TreeCoords, Column1, Line).
+
+fill_impossible_spaces(Board, TreeCoords, Column, Line) :-
+        Column1 is Column - 1,
+        Column2 is Column + 1,
+        Line1 is Line - 1,
+        Line2 is Line + 1,
+        \+ nth1(_, TreeCoords, (Column1, Line)),
+        \+ nth1(_, TreeCoords, (Column2, Line)),
+        \+ nth1(_, TreeCoords, (Column, Line1)),
+        \+ nth1(_, TreeCoords, (Column, Line2)),
+        % if it has no trees around this position then, this position, will never have a tent
+        nth1(Line, Board, L),
+        nth1(Column, L, 0), !,
+        fill_impossible_spaces(Board, TreeCoords, Column2, Line).
+
+fill_impossible_spaces(Board, TreeCoords, Column, Line) :-        
+        Column1 is Column + 1, !,
+        fill_impossible_spaces(Board, TreeCoords, Column1, Line).
+        
+
+% fill_impossible_spaces(+Board, +TreeCoords)
+fill_impossible_spaces(Board, TreeCoords) :-
+        fill_impossible_spaces(Board, TreeCoords, 1, 1).
+        
 
 % element_position(-X, -Y, -Board, +Value)
 element_position(X, Y, Board, Value) :-
@@ -222,8 +262,9 @@ tents:-
         
         create_board(6, 6, Board),
         add_trees(Trees, Board),
+        fill_impossible_spaces(Board, Trees),
         
-        display_board(Board),
+        display_board(Board, Trees),
         
         domain_board(Board, 0, 1),
         
@@ -235,7 +276,7 @@ tents:-
         
         labeling_board(Board),
         
-        display_board(Board).
+        display_board(Board, Trees).
 
 
 
