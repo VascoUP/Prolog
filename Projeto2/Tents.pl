@@ -247,6 +247,19 @@ labeling_board([H|T]) :-
         labeling_board(T).
 
 
+% solve_problem(+Board, +Trees, +Vals_Cls, +Vals_Lns)
+solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
+        domain_board(Board, 0, 1),
+        
+        sum_board(Board, Trees),
+        sum_trees(Trees, Board),
+        sum_lines(Board, Vals_Lns),
+        sum_cols(Board, Vals_Cls),
+        sum_square(Board),
+        
+        labeling_board(Board).
+
+
 
 % ===============================
 % ============ TENTS ============
@@ -254,18 +267,10 @@ labeling_board([H|T]) :-
 
 % tents
 tents:-
-        init_board(Board, Trees, Vals_Cols, Vals_Lines), !,
+        init_board(Board, Trees, Vals_Cols, Vals_Lines),
         
-        display_board(Board, Trees, Vals_Cols, Vals_Lines),
+        display_board(Board, Trees, Vals_Cols, Vals_Lines), !,
         
-        domain_board(Board, 0, 1),
-        
-        sum_board(Board, Trees),
-        sum_trees(Trees, Board),
-        sum_lines(Board, Vals_Lines),
-        sum_cols(Board, Vals_Cols),
-        sum_square(Board),
-        
-        labeling_board(Board),
+        solve_problem(Board, Trees, Vals_Cols, Vals_Lines),
 
         display_board(Board, Trees, Vals_Cols, Vals_Lines).
