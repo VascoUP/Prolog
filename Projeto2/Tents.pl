@@ -256,7 +256,7 @@ labeling_board([H|T]) :-
 tents:-
         init_board(Board, Trees, Vals_Cols, Vals_Lines), !,
         
-        display_board(Board, Trees),
+        display_board(Board, Trees, Vals_Cols, Vals_Lines),
         
         domain_board(Board, 0, 1),
         
@@ -268,4 +268,4 @@ tents:-
         
         labeling_board(Board),
 
-        display_board(Board, Trees).
+        display_board(Board, Trees, Vals_Cols, Vals_Lines).
