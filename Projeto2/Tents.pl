@@ -29,7 +29,8 @@ init_board(Board, Trees, Vals_Cls, Vals_Lns) :-
         create_board(NCols, NLines, Board),
         add_trees(Trees, Board),
         fill_impossible_spaces(Board, Trees).
-        
+
+
 % create_board(+NCols, +NLines, -Board)
 create_board(NCols, NLines, Board) :-
         length(Board2, NLines),
@@ -82,7 +83,6 @@ fill_impossible_spaces(Board, TreeCoords, Column, Line) :-
         Column1 is Column + 1, !,
         fill_impossible_spaces(Board, TreeCoords, Column1, Line).
         
-
 % fill_impossible_spaces(+Board, +TreeCoords)
 fill_impossible_spaces(Board, TreeCoords) :-
         fill_impossible_spaces(Board, TreeCoords, 1, 1).
@@ -143,6 +143,7 @@ value_pos(X, Y, Board, Values, NValues) :-
         append([Value], Values, NValues), !.
 value_pos(_, _, _, Values, Values).
 
+
 % adjancent_values(+X, +Y, +Board, -Values) 
 adjancent_values(X, Y, Board, Values) :-
         value_right(X, Y, Board, [], NValues),
@@ -150,12 +151,14 @@ adjancent_values(X, Y, Board, Values) :-
         value_top(X, Y, Board, NValues2, NValues3),
         value_down(X, Y, Board, NValues3, Values), !.
 
+
 % square_value(+X, +Y, +Board, -Values)
 square_value(X, Y, Board, Values) :-
         value_pos(X, Y, Board, [], NValues),
         value_right(X, Y, Board, NValues, NValues2),
         value_down(X, Y, Board, NValues2, NValues3),
         value_bottom_right(X, Y, Board, NValues3, Values), !.
+
 
 % get_arr_board(+Board, -Res)
 get_arr_board([], []).
@@ -221,13 +224,14 @@ sum_square(Board, X, Y) :-
 % sum_squares(+Board)
 sum_square( Board ) :-
         !, sum_square( Board, 1, 1 ).
+
    
 % sum_board(+Board, +TreeCoords)                    
 sum_board(Board, TreeCoords) :-
         get_arr_board(Board, Res),
         length(TreeCoords, Total),
         sum(Res, #=, Total).
-        
+
 
 
 % ==============================
@@ -239,6 +243,7 @@ domain_board([], _, _).
 domain_board([H|T], Min, Max) :-
         domain(H, Min, Max), !,
         domain_board(T, Min, Max).
+
 
 % labeling_board(+Board)
 labeling_board([]).
@@ -268,9 +273,9 @@ solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
 % tents
 tents:-
         init_board(Board, Trees, Vals_Cols, Vals_Lines),
-        
+        % Display unsolved puzzle
         display_board(Board, Trees, Vals_Cols, Vals_Lines), !,
-        
-        solve_problem(Board, Trees, Vals_Cols, Vals_Lines),
 
+        solve_problem(Board, Trees, Vals_Cols, Vals_Lines),
+        % Display solved puzzle
         display_board(Board, Trees, Vals_Cols, Vals_Lines).
