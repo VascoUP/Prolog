@@ -7,6 +7,11 @@
 
 %board_info(NCols, NLines, Trees, Vals_Cls, Vals_Lns)
 board_info(6, 6, 
+        [(1, 4), (4, 4), (6, 4), (4, 5), (3, 6)],               %Trees
+        [],                                                     %Vals_Cls
+        []). 
+
+board_info(6, 6, 
         [(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)],               %Trees
         [(1, 3), (6, 1)],                                                               %Vals_Cls
         [(1, 2), (6, 2)]).                                                              %Vals_Lns
@@ -151,6 +156,33 @@ adjancent_values(X, Y, Board, Values) :-
         value_top(X, Y, Board, NValues2, NValues3),
         value_down(X, Y, Board, NValues3, Values), !.
 
+% adjancent_trees_values(+X, +Y, +X1, +Y1, +Board, -Values) 
+adjancent_trees_values(X, Y, X1, Y1, Board, Values) :-
+        value_right(X, Y, Board, [], NValues),
+        value_left(X, Y, Board, NValues, NValues2),
+        value_top(X, Y, Board, NValues2, NValues3),
+        value_down(X1, Y1, Board, NValues3, NValues4),        
+        value_right(X1, Y1, Board, NValues4, NValues5),
+        value_left(X1, Y1, Board, NValues5, NValues6),
+        value_top(X1, Y1, Board, NValues6, NValues7),
+        value_down(X1, Y1, Board, NValues7, Vals), 
+        remove_dups(Vals, Values), !.
+
+% around_tree_coords(+X, +Y, -Values) 
+around_tree_coords(X, Y, Values) :-
+        Column1 is X - 1,
+        Column2 is X + 1,
+        Line1 is Y - 1,
+        Line2 is Y + 1,
+        append([(Column1, Y)], [], V1),
+        append([(Column2, Y)], V1, V2),
+        append([(X, Line1)], V2, V3),
+        append([(X, Line2)], V3, V4),
+        append([(Column1, Line1)], V4, V5),
+        append([(Column1, Line2)], V5, V6),
+        append([(Column2, Line1)], V6, V7),
+        append([(Column2, Line2)], V7, Values).
+
 
 % square_value(+X, +Y, +Board, -Values)
 square_value(X, Y, Board, Values) :-
@@ -172,12 +204,30 @@ get_arr_board([H|T], Res) :-
 % ========= RESTRICTIONS =========
 % ================================
 
-% sum_trees(+Trees, +Board)
-sum_trees([], _):- !.
-sum_trees( [(X, Y) | Trees], Board ) :-
+% sum_adj_trees(+X, +Y, +Board, +Trees, +Coords)
+sum_adj_trees(_, _, _, _, []).
+sum_adj_trees(X, Y, Board, Trees, [(X1, Y1) | Coords]) :-
+        nth1(_, Trees, (X1, Y1)),
+        adjancent_trees_values(X, Y, X1, Y1, Board, Values),
+        sum( Values, #>, 1 ), !,
+        sum_adj_trees(X, Y, Board, Trees, Coords).
+
+sum_adj_trees(X, Y, Board, Trees, [_ | Coords]) :-
+        sum_adj_trees(X, Y, Board, Trees, Coords).
+        
+% sum_adj_trees(+X, +Y, +Board, +Trees)       
+sum_adj_trees(X, Y, Board, Trees) :-
+        around_tree_coords(X, Y, Coords),
+        sum_adj_trees(X, Y, Board, Trees, Coords).
+        
+        
+% sum_trees(+Trees, +Board, +ConstTrees)
+sum_trees([], _, _):- !.
+sum_trees( [(X, Y) | Trees], Board, ConstTrees ) :-
         adjancent_values(X, Y, Board, Values),
         sum( Values, #>, 0 ),
-        !, sum_trees( Trees, Board ).
+        sum_adj_trees(X, Y, Board, ConstTrees),
+        !, sum_trees( Trees, Board, ConstTrees ).
 
 
 % sum_line(+Board, +Value, +Line)
@@ -257,7 +307,7 @@ solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
         domain_board(Board, 0, 1),
         
         sum_board(Board, Trees),
-        sum_trees(Trees, Board),
+        sum_trees(Trees, Board, Trees),
         sum_lines(Board, Vals_Lns),
         sum_cols(Board, Vals_Cls),
         sum_square(Board),
