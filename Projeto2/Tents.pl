@@ -1,11 +1,16 @@
 :- use_module(library(clpfd)).
 :- use_module(library(lists)).
+:- use_module(library(random)).
 :- include('display.pl').
 
 % Tree -  0, tent - 1, empty space - 0
 
 
 %board_info(NCols, NLines, Trees, Vals_Cls, Vals_Lns)
+%board_info(6, 6,
+%           [(3,1),(5,1),(5,2),(4,3),(1,4),(5,4),(4,5),(1,6)],
+%           [],
+%           []).
 board_info(6, 6, 
         [(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)],               %Trees
         [(1, 3), (6, 1)],                                                               %Vals_Cls
@@ -86,7 +91,49 @@ fill_impossible_spaces(Board, TreeCoords, Column, Line) :-
 % fill_impossible_spaces(+Board, +TreeCoords)
 fill_impossible_spaces(Board, TreeCoords) :-
         fill_impossible_spaces(Board, TreeCoords, 1, 1).
+
+
+
+% ===============================
+% ========== GENERATOR ==========
+% ===============================
+
+% validate_tree(+NCols, +NLines, +Trees)
+validate_tree(NCols, NLines, Trees) :-
+        create_board(NCols, NLines, Board),
+        add_trees(Trees, Board),
+        fill_impossible_spaces(Board, Trees), !,
+        solve_problem(Board, Trees, [], []).
+
+% place_tree(+NCols, +NLines, +X, +Y, +Prob, +Trees, -ResProb, -ResTrees)
+place_tree(NCols, NLines, X, Y, Prob, Trees, ResProb, ResTrees) :-
+        random(1, 100, Value),
+        Value =< Prob,
         
+        ( validate_tree(NCols, NLines, [(X, Y) | Trees])
+        ->              ResProb is 10,
+                        append([(X, Y)], Trees, ResTrees)
+        ;               ResProb is Prob + 5,
+                        ResTrees = Trees
+        ).
+place_tree(_, _, _, _, Prob, Trees, ResProb, Trees) :-
+        ResProb is Prob + 5.
+
+% random_trees(+NCols, +NLines, +X, +Y, -Prob, -Trees)
+random_trees(_, NLines, _, Y, Prob, Trees) :-
+        Y > NLines,
+        Trees = [],
+        Prob is 10.
+        
+random_trees(NCols, NLines, X, Y, Prob, Trees) :-
+        X > NCols,
+        Y1 is Y + 1, !,
+        random_trees(NCols, NLines, 1, Y1, Prob, Trees).
+
+random_trees(NCols, NLines, X, Y, Prob, Trees) :-
+        X1 is X + 1, !,
+        random_trees(NCols, NLines, X1, Y, P, T),
+        place_tree(NCols, NLines, X, Y, P, T, Prob, Trees).
 
 
 % ===============================
@@ -157,8 +204,8 @@ coord_values(Board, [(X, Y)|Coords], Values) :-
         value_pos(X, Y, Board, Vals, Values).
 
 
-% adjancent_coords(+X, +Y, -Values) 
-adjancent_coords(X, Y, Values) :-
+% adjacent_coords(+X, +Y, -Values) 
+adjacent_coords(X, Y, Values) :-
         coord_right(X, Y, [], V1),
         coord_left(X, Y, V1, V2),
         coord_top(X, Y, V2, V3),
@@ -178,9 +225,9 @@ square_coords(X, Y, Values) :-
         coord_bottom_right(X, Y, V2, Values).
 
 
-% adjancent_values(+X, +Y, +Board, -Values) 
-adjancent_values(X, Y, Board, Values) :-
-        adjancent_coords(X, Y, Coords),
+% adjacent_values(+X, +Y, +Board, -Values) 
+adjacent_values(X, Y, Board, Values) :-
+        adjacent_coords(X, Y, Coords),
         coord_values(Board, Coords, Values).
 
 % square_value(+X, +Y, +Board, -Values)
@@ -189,10 +236,10 @@ square_value(X, Y, Board, Values) :-
         coord_values(Board, Coords, Values).
 
 
-% adjancent_trees_values(+X, +Y, +X1, +Y1, +Board, -Values) 
-adjancent_trees_values(X, Y, X1, Y1, Board, Values) :-
-        adjancent_coords(X, Y, Coords1),
-        adjancent_coords(X1, Y1, Coords2),
+% adjacent_trees_values(+X, +Y, +X1, +Y1, +Board, -Values) 
+adjacent_trees_values(X, Y, X1, Y1, Board, Values) :-
+        adjacent_coords(X, Y, Coords1),
+        adjacent_coords(X1, Y1, Coords2),
         append(Coords1, Coords2, Coords),
         remove_dups(Coords, CoordsRes),
         coord_values(Board, CoordsRes, Values).
@@ -202,7 +249,29 @@ adjancent_trees_values(X, Y, X1, Y1, Board, Values) :-
 get_arr_board([], []).
 get_arr_board([H|T], Res) :-
         get_arr_board(T, Res2),
-        append(H, Res2, Res). 
+        append(H, Res2, Res).
+
+% coords_adjacent_coords(+Coords, -Res)
+coords_adjacent_coords([], []).
+coords_adjacent_coords([(X1, Y1) | Coords], Res) :-
+        coords_adjacent_coords(Coords, R),
+        adjacent_coords(X1, Y1, AdjCoords),
+        append(AdjCoords, R, Res).
+
+% get_adj_of_adj_coord(+X, +Y, -Res)
+get_adj_of_adj_coords(X, Y, Res):-
+        adjacent_coords(X, Y, Coords),
+        coords_adjacent_coords(Coords, R),
+        append([(X, Y)], R, R1),
+        remove_dups(R1, R2),
+        delete(R2, (X, Y), Res).
+
+
+% get_adj_of_adj(+X, +Y, +Board, -Res)
+get_adj_of_adj(X, Y, Board, Res):-
+        get_adj_of_adj_coords(X, Y, R),
+        coord_values(Board, R, Res).
+        
 
 
 
@@ -210,27 +279,27 @@ get_arr_board([H|T], Res) :-
 % ========= RESTRICTIONS =========
 % ================================
 
-% sum_diagonal_trees(+X, +Y, +Board, +Trees, +Coords)
-sum_diagonal_trees(_, _, _, _, []).
-sum_diagonal_trees(X, Y, Board, Trees, [(X1, Y1) | Coords]) :-
+% sum_near_trees(+X, +Y, +Board, +Trees, +Coords)
+sum_near_trees(_, _, _, _, []).
+sum_near_trees(X, Y, Board, Trees, [(X1, Y1) | Coords]) :-
         nth1(_, Trees, (X1, Y1)),
-        adjancent_trees_values(X, Y, X1, Y1, Board, Values),
+        adjacent_trees_values(X, Y, X1, Y1, Board, Values),
         sum( Values, #>, 1 ), !,
-        sum_diagonal_trees(X, Y, Board, Trees, Coords).
+        sum_near_trees(X, Y, Board, Trees, Coords).
 
-sum_diagonal_trees(X, Y, Board, Trees, [_| Coords]) :-
-        !, sum_diagonal_trees(X, Y, Board, Trees, Coords).
+sum_near_trees(X, Y, Board, Trees, [_| Coords]) :-
+        !, sum_near_trees(X, Y, Board, Trees, Coords).
         
 % sum_adj_trees(+X, +Y, +Board, +Trees)       
 sum_adj_trees(X, Y, Board, Trees) :-
-        diagonal_coords(X, Y, Coords),
-        sum_diagonal_trees(X, Y, Board, Trees, Coords).
+        get_adj_of_adj_coords(X, Y, Coords),
+        sum_near_trees(X, Y, Board, Trees, Coords).
         
         
 % sum_trees(+Trees, +Board, +ConstTrees)
 sum_trees([], _, _):- !.
 sum_trees( [(X, Y) | Trees], Board, ConstTrees ) :-
-        adjancent_values(X, Y, Board, Values),
+        adjacent_values(X, Y, Board, Values),
         sum( Values, #>, 0 ),
         sum_adj_trees(X, Y, Board, ConstTrees),
         !, sum_trees( Trees, Board, ConstTrees ).
