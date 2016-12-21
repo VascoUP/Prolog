@@ -7,10 +7,10 @@
 
 
 %board_info(NCols, NLines, Trees, Vals_Cls, Vals_Lns)
-%board_info(5, 4, 
-%        [(1, 1), (3, 1), (5, 3)],
-%        [(5, 2)],
-%        [(2, 1), (4, 1)]).
+%board_info(1, 1, 
+%        [(1, 1)],
+%        [],
+%        []).
 
 board_info(6, 6, 
         [(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)],               %Trees
@@ -28,10 +28,8 @@ board_info(7, 7,
 % ======= INITIALIZE BOARD =======
 % ================================
 
-%init_tents(-Board, -Trees, -Vals_Cls, -Vals_Lns)
-init_board(Board, Trees, Vals_Cls, Vals_Lns) :-
-        board_info(NCols, NLines, Trees, Vals_Cls, Vals_Lns),
-        
+%init_board(+NCols, +NLines, +Trees, -Board)
+init_board(NCols, NLines, Trees, Board) :-        
         create_board(NCols, NLines, Board),
         add_trees(Trees, Board),
         fill_impossible_spaces(Board, Trees).
@@ -101,24 +99,21 @@ fill_impossible_spaces(Board, TreeCoords) :-
 
 % validate_tree(+NCols, +NLines, +Trees)
 validate_tree(NCols, NLines, Trees) :-
-        create_board(NCols, NLines, Board),
-        add_trees(Trees, Board),
-        fill_impossible_spaces(Board, Trees), !,
+        init_board(NCols, NLines, Trees, Board), !,
         solve_problem(Board, Trees, [], []).
 
 % place_tree(+NCols, +NLines, +X, +Y, +Prob, +Trees, -ResProb, -ResTrees)
 place_tree(NCols, NLines, X, Y, Prob, Trees, ResProb, ResTrees) :-
         random(1, 100, Value),
         Value =< Prob,
+
+        validate_tree(NCols, NLines, [(X, Y) | Trees]),
         
-        ( validate_tree(NCols, NLines, [(X, Y) | Trees])
-        ->              ResProb is 10,
-                        append([(X, Y)], Trees, ResTrees)
-        ;               ResProb is Prob + 5,
-                        ResTrees = Trees
-        ).
+        ResProb is 10,
+        append([(X, Y)], Trees, ResTrees).
+
 place_tree(_, _, _, _, Prob, Trees, ResProb, Trees) :-
-        ResProb is Prob + 5.
+        ResProb is Prob + 10.
 
 % random_trees(+NCols, +NLines, +X, +Y, -Prob, -Trees)
 random_trees(_, NLines, _, Y, Prob, Trees) :-
@@ -135,6 +130,16 @@ random_trees(NCols, NLines, X, Y, Prob, Trees) :-
         X1 is X + 1, !,
         random_trees(NCols, NLines, X1, Y, P, T),
         place_tree(NCols, NLines, X, Y, P, T, Prob, Trees).
+
+% random_trees(+NCols, +NLines, -Trees)
+random_trees(NCols, NLines, Trees) :-
+        random_trees(NCols, NLines, 1, 1, _, Trees).
+
+generate_board(Board, Trees, [], []) :-
+        random(5, 10, NCols),
+        random(5, 10, NLines),
+        random_trees(NCols, NLines, Trees),
+        init_board(NCols, NLines, Trees, Board).
 
 
 % ===============================
@@ -363,7 +368,7 @@ solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
         sum_trees(Trees, Board, Trees),
         sum_lines(Board, Vals_Lns),
         sum_cols(Board, Vals_Cls),
-        sum_square(Board),
+        sum_square(Board), !,
         
         labeling_board(Board).
 
@@ -375,10 +380,20 @@ solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
 
 % tents
 tents:-
-        init_board(Board, Trees, Vals_Cols, Vals_Lines),
+        board_info(NCols, NLines, Trees, Vals_Cls, Vals_Lns),
+        init_board(NCols, NLines, Trees, Board),
         % Display unsolved puzzle
-        display_board(Board, Trees, Vals_Cols, Vals_Lines), !,
+        display_board(Board, Trees, Vals_Cls, Vals_Lns), !,
 
-        solve_problem(Board, Trees, Vals_Cols, Vals_Lines),
+        solve_problem(Board, Trees, Vals_Cls, Vals_Lns),
         % Display solved puzzle
-        display_board(Board, Trees, Vals_Cols, Vals_Lines).
+        display_board(Board, Trees, Vals_Cls, Vals_Lns).
+
+tents_auto:-
+        generate_board(Board, Trees, Vals_Cls, Vals_Lns),
+        % Display unsolved puzzle
+        display_board(Board, Trees, Vals_Cls, Vals_Lns), !,
+
+        solve_problem(Board, Trees, Vals_Cls, Vals_Lns),
+        % Display solved puzzle
+        display_board(Board, Trees, Vals_Cls, Vals_Lns).
