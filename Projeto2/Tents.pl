@@ -7,10 +7,11 @@
 
 
 %board_info(NCols, NLines, Trees, Vals_Cls, Vals_Lns)
-%board_info(6, 6,
-%           [(3,1),(5,1),(5,2),(4,3),(1,4),(5,4),(4,5),(1,6)],
-%           [],
-%           []).
+%board_info(5, 4, 
+%        [(1, 1), (3, 1), (5, 3)],
+%        [(5, 2)],
+%        [(2, 1), (4, 1)]).
+
 board_info(6, 6, 
         [(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)],               %Trees
         [(1, 3), (6, 1)],                                                               %Vals_Cls
@@ -251,49 +252,28 @@ get_arr_board([H|T], Res) :-
         get_arr_board(T, Res2),
         append(H, Res2, Res).
 
-% coords_adjacent_coords(+Coords, -Res)
-coords_adjacent_coords([], []).
-coords_adjacent_coords([(X1, Y1) | Coords], Res) :-
-        coords_adjacent_coords(Coords, R),
-        adjacent_coords(X1, Y1, AdjCoords),
-        append(AdjCoords, R, Res).
-
-% get_adj_of_adj_coord(+X, +Y, -Res)
-get_adj_of_adj_coords(X, Y, Res):-
-        adjacent_coords(X, Y, Coords),
-        coords_adjacent_coords(Coords, R),
-        append([(X, Y)], R, R1),
-        remove_dups(R1, R2),
-        delete(R2, (X, Y), Res).
-
-
-% get_adj_of_adj(+X, +Y, +Board, -Res)
-get_adj_of_adj(X, Y, Board, Res):-
-        get_adj_of_adj_coords(X, Y, R),
-        coord_values(Board, R, Res).
-        
-
 
 
 % ================================
 % ========= RESTRICTIONS =========
 % ================================
 
-% sum_near_trees(+X, +Y, +Board, +Trees, +Coords)
-sum_near_trees(_, _, _, _, []).
-sum_near_trees(X, Y, Board, Trees, [(X1, Y1) | Coords]) :-
-        nth1(_, Trees, (X1, Y1)),
-        adjacent_trees_values(X, Y, X1, Y1, Board, Values),
-        sum( Values, #>, 1 ), !,
-        sum_near_trees(X, Y, Board, Trees, Coords).
+% abs_coord_diff(+X, +Y, +X1, +Y1, -Res)
+abs_coord_diff(X, Y, X1, Y1, Res) :-
+        Res is abs(X - X1) + abs(Y - Y1).
 
-sum_near_trees(X, Y, Board, Trees, [_| Coords]) :-
-        !, sum_near_trees(X, Y, Board, Trees, Coords).
-        
-% sum_adj_trees(+X, +Y, +Board, +Trees)       
-sum_adj_trees(X, Y, Board, Trees) :-
-        get_adj_of_adj_coords(X, Y, Coords),
-        sum_near_trees(X, Y, Board, Trees, Coords).
+% sum_adj_trees(+X, +Y, +Board, +Trees)
+sum_adj_trees(_, _, _, []).
+
+sum_adj_trees(X, Y, Board, [(X1, Y1)|Trees]) :-
+        abs_coord_diff(X, Y, X1, Y1, Res),
+        Res = 2, !,
+        adjacent_trees_values(X, Y, X1, Y1, Board, Values),
+        sum(Values, #>, 1), !,
+        sum_adj_trees(X, Y, Board, Trees).
+
+sum_adj_trees(X, Y, Board, [_|Trees]) :-
+        !, sum_adj_trees(X, Y, Board, Trees).
         
         
 % sum_trees(+Trees, +Board, +ConstTrees)
