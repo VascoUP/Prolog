@@ -93,98 +93,109 @@ fill_impossible_spaces(Board, TreeCoords) :-
 % ==== GET VALUES FROM BOARD ====
 % ===============================
 
-
 % value_position(+X, +Y, +Board, -Value)
 value_position(X, Y, Board, Value) :-
-        nth1(Y, Board, Line),
-        nth1(X, Line, Value), !.
-value_position(_, _, _, _) :- !, fail.
+        !, nth1(Y, Board, Line),
+        nth1(X, Line, Value).
+
+% value_pos(+X, +Y, +Board, -Value)
+value_pos(X, Y, Board, Values, NValues) :-
+        value_position(X, Y, Board, Value), !,
+        append([Value], Values, NValues).
+value_pos(_, _, _, Values, Values).
 
 
-% value_right(+X, +Y, +Board, -Value)
-value_right(X, Y, Board, Values, NValues) :-
+% coord_right(+X, +Y, -Value)
+coord_right(X, Y, Values, NValues) :-
         X1 is X + 1,
-        value_position(X1, Y, Board, Value),
-        append([Value], Values, NValues), !.
-value_right(_, _, _, Values, Values).
+        append([(X1, Y)], Values, NValues).
 
-% value_left(+X, +Y, +Board, -Value)
-value_left(X, Y, Board, Values, NValues) :-
+% coord_left(+X, +Y, -Value)
+coord_left(X, Y, Values, NValues) :-
         X1 is X - 1,
-        value_position(X1, Y, Board, Value),
-        append([Value], Values, NValues), !.
-value_left(_, _, _, Values, Values).
+        append([(X1, Y)], Values, NValues).
 
-% value_top(+X, +Y, +Board, -Value)
-value_top(X, Y, Board, Values, NValues) :-
+% coord_top(+X, +Y, -Value)
+coord_top(X, Y, Values, NValues) :-
         Y1 is Y - 1,
-        value_position(X, Y1, Board, Value),
-        append([Value], Values, NValues), !.
-value_top(_, _, _, Values, Values).
+        append([(X, Y1)], Values, NValues).
 
-% value_down(+X, +Y, +Board, -Value)
-value_down(X, Y, Board, Values, NValues) :-
+% coord_down(+X, +Y, -Value)
+coord_down(X, Y, Values, NValues) :-
         Y1 is Y + 1, 
-        value_position(X, Y1, Board, Value),
-        append([Value], Values, NValues), !.
-value_down(_, _, _, Values, Values).
+        append([(X, Y1)], Values, NValues).
 
-% value_bottom_right(+X, +Y, +Board, -Value)
-value_bottom_right(X, Y, Board, Values, NValues) :-
+% coord_bottom_right(+X, +Y, -Value)
+coord_bottom_right(X, Y, Values, NValues) :-
         Y1 is Y + 1,
         X1 is X + 1,
-        value_position(X1, Y1, Board, Value),
-        append([Value], Values, NValues), !.
-value_bottom_right(_, _, _, Values, Values).
+        append([(X1, Y1)], Values, NValues).
 
-% value_bottom_left(+X, +Y, +Board, -Value)
-value_pos(X, Y, Board, Values, NValues) :-
-        value_position(X, Y, Board, Value),
-        append([Value], Values, NValues), !.
-value_pos(_, _, _, Values, Values).
+% coord_bottom_left(+X, +Y, -Value)
+coord_bottom_left(X, Y, Values, NValues) :-
+        Y1 is Y + 1,
+        X1 is X - 1,
+        append([(X1, Y1)], Values, NValues).
+
+% coord_top_right(+X, +Y, -Value)
+coord_top_right(X, Y, Values, NValues) :-
+        Y1 is Y - 1,
+        X1 is X + 1,
+        append([(X1, Y1)], Values, NValues).
+
+% coord_top_left(+X, +Y, -Value)
+coord_top_left(X, Y, Values, NValues) :-
+        Y1 is Y - 1,
+        X1 is X - 1,
+        append([(X1, Y1)], Values, NValues).
+
+
+% coord_values(+Board, +Coords, -Values) 
+coord_values(_, [], []).
+coord_values(Board, [(X, Y)|Coords], Values) :-
+        !, coord_values(Board, Coords, Vals),
+        value_pos(X, Y, Board, Vals, Values).
+
+
+% adjancent_coords(+X, +Y, -Values) 
+adjancent_coords(X, Y, Values) :-
+        coord_right(X, Y, [], V1),
+        coord_left(X, Y, V1, V2),
+        coord_top(X, Y, V2, V3),
+        coord_down(X, Y, V3, Values).
+
+% diagonal_coords(+X, +Y, -Values)
+diagonal_coords(X, Y, Values) :-
+        coord_bottom_right(X, Y, [], V1),
+        coord_bottom_left(X, Y, V1, V2),
+        coord_top_right(X, Y, V2, V3),
+        coord_top_left(X, Y, V3, Values).
+
+% square_coords(+X, +Y, -Values)
+square_coords(X, Y, Values) :-
+        coord_right(X, Y, [(X, Y)], V1),
+        coord_down(X, Y, V1, V2),
+        coord_bottom_right(X, Y, V2, Values).
 
 
 % adjancent_values(+X, +Y, +Board, -Values) 
 adjancent_values(X, Y, Board, Values) :-
-        value_right(X, Y, Board, [], NValues),
-        value_left(X, Y, Board, NValues, NValues2),
-        value_top(X, Y, Board, NValues2, NValues3),
-        value_down(X, Y, Board, NValues3, Values), !.
-
-% adjancent_trees_values(+X, +Y, +X1, +Y1, +Board, -Values) 
-adjancent_trees_values(X, Y, X1, Y1, Board, Values) :-
-        value_right(X, Y, Board, [], NValues),
-        value_left(X, Y, Board, NValues, NValues2),
-        value_top(X, Y, Board, NValues2, NValues3),
-        value_down(X1, Y1, Board, NValues3, NValues4),        
-        value_right(X1, Y1, Board, NValues4, NValues5),
-        value_left(X1, Y1, Board, NValues5, NValues6),
-        value_top(X1, Y1, Board, NValues6, NValues7),
-        value_down(X1, Y1, Board, NValues7, Vals), 
-        remove_dups(Vals, Values), !.
-
-% around_tree_coords(+X, +Y, -Values) 
-around_tree_coords(X, Y, Values) :-
-        Column1 is X - 1,
-        Column2 is X + 1,
-        Line1 is Y - 1,
-        Line2 is Y + 1,
-        append([(Column1, Y)], [], V1),
-        append([(Column2, Y)], V1, V2),
-        append([(X, Line1)], V2, V3),
-        append([(X, Line2)], V3, V4),
-        append([(Column1, Line1)], V4, V5),
-        append([(Column1, Line2)], V5, V6),
-        append([(Column2, Line1)], V6, V7),
-        append([(Column2, Line2)], V7, Values).
-
+        adjancent_coords(X, Y, Coords),
+        coord_values(Board, Coords, Values).
 
 % square_value(+X, +Y, +Board, -Values)
 square_value(X, Y, Board, Values) :-
-        value_pos(X, Y, Board, [], NValues),
-        value_right(X, Y, Board, NValues, NValues2),
-        value_down(X, Y, Board, NValues2, NValues3),
-        value_bottom_right(X, Y, Board, NValues3, Values), !.
+        square_coords(X, Y, Coords),
+        coord_values(Board, Coords, Values).
+
+
+% adjancent_trees_values(+X, +Y, +X1, +Y1, +Board, -Values) 
+adjancent_trees_values(X, Y, X1, Y1, Board, Values) :-
+        adjancent_coords(X, Y, Coords1),
+        adjancent_coords(X1, Y1, Coords2),
+        append(Coords1, Coords2, Coords),
+        remove_dups(Coords, CoordsRes),
+        coord_values(Board, CoordsRes, Values).
 
 
 % get_arr_board(+Board, -Res)
@@ -199,21 +210,21 @@ get_arr_board([H|T], Res) :-
 % ========= RESTRICTIONS =========
 % ================================
 
-% sum_adj_trees(+X, +Y, +Board, +Trees, +Coords)
-sum_adj_trees(_, _, _, _, []).
-sum_adj_trees(X, Y, Board, Trees, [(X1, Y1) | Coords]) :-
+% sum_diagonal_trees(+X, +Y, +Board, +Trees, +Coords)
+sum_diagonal_trees(_, _, _, _, []).
+sum_diagonal_trees(X, Y, Board, Trees, [(X1, Y1) | Coords]) :-
         nth1(_, Trees, (X1, Y1)),
         adjancent_trees_values(X, Y, X1, Y1, Board, Values),
         sum( Values, #>, 1 ), !,
-        sum_adj_trees(X, Y, Board, Trees, Coords).
+        sum_diagonal_trees(X, Y, Board, Trees, Coords).
 
-sum_adj_trees(X, Y, Board, Trees, [_ | Coords]) :-
-        sum_adj_trees(X, Y, Board, Trees, Coords).
+sum_diagonal_trees(X, Y, Board, Trees, [_| Coords]) :-
+        !, sum_diagonal_trees(X, Y, Board, Trees, Coords).
         
 % sum_adj_trees(+X, +Y, +Board, +Trees)       
 sum_adj_trees(X, Y, Board, Trees) :-
-        around_tree_coords(X, Y, Coords),
-        sum_adj_trees(X, Y, Board, Trees, Coords).
+        diagonal_coords(X, Y, Coords),
+        sum_diagonal_trees(X, Y, Board, Trees, Coords).
         
         
 % sum_trees(+Trees, +Board, +ConstTrees)
@@ -279,19 +290,19 @@ sum_board(Board, TreeCoords) :-
 
 
 
-% ==============================
-% ============ MISC ============
-% ==============================
+% ===============================
+% ============ SOLVE ============
+% ===============================
 
 % domain_board(+Board, +Min, +Max)
 domain_board(Board, Min, Max) :-
-        get_arr_board(Board, Res),
+        get_arr_board(Board, Res), !,
         domain(Res, Min, Max).
 
 
 % labeling_board(+Board)
 labeling_board(Board) :-
-        get_arr_board(Board, Res),
+        get_arr_board(Board, Res), !,
         labeling([], Res).
 
 
