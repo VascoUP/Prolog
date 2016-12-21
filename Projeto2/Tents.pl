@@ -7,11 +7,6 @@
 
 %board_info(NCols, NLines, Trees, Vals_Cls, Vals_Lns)
 board_info(6, 6, 
-        [(1, 4), (4, 4), (6, 4), (4, 5), (3, 6)],               %Trees
-        [],                                                     %Vals_Cls
-        []). 
-
-board_info(6, 6, 
         [(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)],               %Trees
         [(1, 3), (6, 1)],                                                               %Vals_Cls
         [(1, 2), (6, 2)]).                                                              %Vals_Lns
@@ -264,7 +259,7 @@ sum_square(Board, X, Y) :-
         sum_square(Board, 1, Y1).
 sum_square(Board, _, Y) :-
         length(Board, NLines),
-        Y >= NLines, !.
+        Y >= NLines.
 sum_square(Board, X, Y) :-
         square_value(X, Y, Board, Square),
         sum(Square, #<, 2), 
@@ -289,17 +284,15 @@ sum_board(Board, TreeCoords) :-
 % ==============================
 
 % domain_board(+Board, +Min, +Max)
-domain_board([], _, _).
-domain_board([H|T], Min, Max) :-
-        domain(H, Min, Max), !,
-        domain_board(T, Min, Max).
+domain_board(Board, Min, Max) :-
+        get_arr_board(Board, Res),
+        domain(Res, Min, Max).
 
 
 % labeling_board(+Board)
-labeling_board([]).
-labeling_board([H|T]) :-
-        labeling([], H), !,
-        labeling_board(T).
+labeling_board(Board) :-
+        get_arr_board(Board, Res),
+        labeling([], Res).
 
 
 % solve_problem(+Board, +Trees, +Vals_Cls, +Vals_Lns)
