@@ -137,8 +137,8 @@ random_trees(NCols, NLines, Trees) :-
 
 % generate_board(-Board, -Trees, -Vals_Cls, -Vals_Lns)
 generate_board(Board, Trees, [], []) :-
-        random(5, 10, NCols),
-        random(5, 10, NLines),
+        random(5, 11, NCols),
+        random(5, 11, NLines),
         random_trees(NCols, NLines, Trees),
         init_board(NCols, NLines, Trees, Board).
 
@@ -359,9 +359,7 @@ domain_board(Board, Min, Max) :-
 % labeling_board(+Board)
 labeling_board(Board) :-
         get_arr_board(Board, Res), !,
-        labeling([], Res),
-		print_time,
-		fd_statistics.
+        labeling([ffc], Res).
 
 % solve_problem(+Board, +Trees, +Vals_Cls, +Vals_Lns)
 solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
@@ -379,10 +377,10 @@ solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
 % =========== STATISTICS ========
 % ===============================
 
-print_time :-
-	statistics(walltime,[_,T]),
-	TS is (T*0.001),
-	nl, write('Time: '), write(TS), write('s'), nl, nl.
+resetTime :- statistics(walltime,_).
+currentTime(T) :- statistics(walltime,[_,T]).
+printTime(T):- 	TS is (T*0.001),
+				nl, write('Time: '), write(TS), write('s'), nl, nl.
 
 % ===============================
 % ============ TENTS ============
@@ -402,8 +400,14 @@ tents:-
 tents_auto:-
         generate_board(Board, Trees, Vals_Cls, Vals_Lns),
         % Display unsolved puzzle
+		resetTime,
+		
         display_board(Board, Trees, Vals_Cls, Vals_Lns), !,
-
         solve_problem(Board, Trees, Vals_Cls, Vals_Lns),
+		
         % Display solved puzzle
-        display_board(Board, Trees, Vals_Cls, Vals_Lns).
+        display_board(Board, Trees, Vals_Cls, Vals_Lns),
+		
+		currentTime(T),
+		printTime(T),
+		fd_statistics.
