@@ -372,7 +372,7 @@ solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
         sum_lines(Board, Vals_Lns),
         sum_cols(Board, Vals_Cls),
         sum_square(Board), !,
-        
+      
         labeling_board(Board).
 
 % ===============================
@@ -381,7 +381,7 @@ solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
 
 print_time :-
 	statistics(walltime,[_,T]),
-	TS is ((T//10)*10)/1000,
+	TS is (T*0.001),
 	nl, write('Time: '), write(TS), write('s'), nl, nl.
 
 % ===============================
