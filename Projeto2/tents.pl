@@ -28,7 +28,7 @@ board_info(7, 7,
 % ======= INITIALIZE BOARD =======
 % ================================
 
-%init_board(+NCols, +NLines, +Trees, -Board)
+% init_board(+NCols, +NLines, +Trees, -Board)
 init_board(NCols, NLines, Trees, Board) :-        
         create_board(NCols, NLines, Board),
         add_trees(Trees, Board),
@@ -359,8 +359,9 @@ domain_board(Board, Min, Max) :-
 % labeling_board(+Board)
 labeling_board(Board) :-
         get_arr_board(Board, Res), !,
-        labeling([], Res).
-
+        labeling([], Res),
+		print_time,
+		fd_statistics.
 
 % solve_problem(+Board, +Trees, +Vals_Cls, +Vals_Lns)
 solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
@@ -374,7 +375,14 @@ solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
         
         labeling_board(Board).
 
+% ===============================
+% =========== STATISTICS ========
+% ===============================
 
+print_time :-
+	statistics(walltime,[_,T]),
+	TS is ((T//10)*10)/1000,
+	nl, write('Time: '), write(TS), write('s'), nl, nl.
 
 % ===============================
 % ============ TENTS ============
