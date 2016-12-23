@@ -158,52 +158,52 @@ value_position(X, Y, Board, Value) :-
         !, nth1(Y, Board, Line),
         nth1(X, Line, Value).
 
-% value_pos(+X, +Y, +Board, -Value)
+% value_pos(+X, +Y, +Board, -Value, -NValues)
 value_pos(X, Y, Board, Values, NValues) :-
         value_position(X, Y, Board, Value), !,
         append([Value], Values, NValues).
 value_pos(_, _, _, Values, Values).
 
 
-% coord_right(+X, +Y, -Value)
+% coord_right(+X, +Y, -Value, -NValues)
 coord_right(X, Y, Values, NValues) :-
         X1 is X + 1,
         append([(X1, Y)], Values, NValues).
 
-% coord_left(+X, +Y, -Value)
+% coord_left(+X, +Y, -Value, -NValues)
 coord_left(X, Y, Values, NValues) :-
         X1 is X - 1,
         append([(X1, Y)], Values, NValues).
 
-% coord_top(+X, +Y, -Value)
+% coord_top(+X, +Y, -Value, -NValues)
 coord_top(X, Y, Values, NValues) :-
         Y1 is Y - 1,
         append([(X, Y1)], Values, NValues).
 
-% coord_down(+X, +Y, -Value)
+% coord_down(+X, +Y, -Value, -NValues)
 coord_down(X, Y, Values, NValues) :-
         Y1 is Y + 1, 
         append([(X, Y1)], Values, NValues).
 
-% coord_bottom_right(+X, +Y, -Value)
+% coord_bottom_right(+X, +Y, -Value, -NValues)
 coord_bottom_right(X, Y, Values, NValues) :-
         Y1 is Y + 1,
         X1 is X + 1,
         append([(X1, Y1)], Values, NValues).
 
-% coord_bottom_left(+X, +Y, -Value)
+% coord_bottom_left(+X, +Y, -Value, -NValues)
 coord_bottom_left(X, Y, Values, NValues) :-
         Y1 is Y + 1,
         X1 is X - 1,
         append([(X1, Y1)], Values, NValues).
 
-% coord_top_right(+X, +Y, -Value)
+% coord_top_right(+X, +Y, -Value, -NValues)
 coord_top_right(X, Y, Values, NValues) :-
         Y1 is Y - 1,
         X1 is X + 1,
         append([(X1, Y1)], Values, NValues).
 
-% coord_top_left(+X, +Y, -Value)
+% coord_top_left(+X, +Y, -Value, -NValues)
 coord_top_left(X, Y, Values, NValues) :-
         Y1 is Y - 1,
         X1 is X - 1,
@@ -423,7 +423,6 @@ tents:-
 
 % tents_auto
 tents_auto:-
-		resetTime,
         generate_board(Board, Trees, Vals_Cls, Vals_Lns),
         % Display unsolved puzzle
 		
@@ -431,8 +430,4 @@ tents_auto:-
         solve_problem(Board, Trees, Vals_Cls, Vals_Lns),
 		
         % Display solved puzzle
-        display_board(Board, Trees, Vals_Cls, Vals_Lns),
-		
-		currentTime(T),
-		printTime(T),
-		fd_statistics.
+        display_board(Board, Trees, Vals_Cls, Vals_Lns).
