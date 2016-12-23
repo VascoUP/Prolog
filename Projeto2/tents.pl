@@ -137,8 +137,8 @@ random_trees(NCols, NLines, Trees) :-
 
 % generate_board(-Board, -Trees, -Vals_Cls, -Vals_Lns)
 generate_board(Board, Trees, [], []) :-
-        random(5, 6, NCols),
-        random(5, 6, NLines),
+        random(5, 11, NCols),
+        random(5, 11, NLines),
         random_trees(NCols, NLines, Trees),
         init_board(NCols, NLines, Trees, Board).
 
