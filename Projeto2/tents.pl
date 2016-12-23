@@ -7,10 +7,10 @@
 
 
 %board_info(NCols, NLines, Trees, Vals_Cls, Vals_Lns)
-%board_info(1, 1, 
-%        [(1, 1)],
-%        [],
-%        []).
+board_info(7, 3, 
+        [(1, 1), (3, 1), (6, 1), (2, 2)],
+        [],
+        [(1, 3)]).
 
 board_info(6, 6, 
         [(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)],               %Trees
@@ -233,11 +233,6 @@ square_coords(X, Y, Values) :-
         coord_bottom_right(X, Y, V2, Values).
 
 
-% adjacent_values(+X, +Y, +Board, -Values) 
-adjacent_values(X, Y, Board, Values) :-
-        adjacent_coords(X, Y, Coords),
-        coord_values(Board, Coords, Values).
-
 % square_value(+X, +Y, +Board, -Values)
 square_value(X, Y, Board, Values) :-
         square_coords(X, Y, Coords),
@@ -253,6 +248,37 @@ adjacent_trees_values(X, Y, X1, Y1, Board, Values) :-
         coord_values(Board, CoordsRes, Values).
 
 
+% adjacent_trees_coords(+X, +Y, +X1, +Y1, -Coords)
+adjacent_trees_coords([], []).
+adjacent_trees_coords([(X, Y)|Trees], Coords) :-
+        adjacent_trees_coords(Trees, C),
+        adjacent_coords(X, Y, Coords1),
+        append(Coords1, C, Coords).
+
+
+% adjacent_trees_values(+Trees, +Board, -Values)
+adjacent_trees_values(Trees, Board, Values) :-
+        adjacent_trees_coords(Trees, Coords),
+        remove_dups(Coords, CoordsRes),
+        coord_values(Board, CoordsRes, Values).
+
+
+% abs_coord_diff(+X, +Y, +X1, +Y1, -Res)
+abs_coord_diff(X, Y, X1, Y1, Res) :-
+        Res is abs(X - X1) + abs(Y - Y1).
+
+
+% close_trees_coords(+X, +Y, +Trees, -Coords)
+close_trees_coords(X, Y, [], [(X, Y)]).
+close_trees_coords(X, Y, [(X1, Y1)|Trees], Coords) :-
+        abs_coord_diff(X, Y, X1, Y1, Res),
+        Res = 2, !,
+       close_trees_coords(X, Y, Trees, C),
+        append([(X1, Y1)], C, Coords).
+close_trees_coords(X, Y, [_|Trees], Coords) :-
+        !, close_trees_coords(X, Y, Trees, Coords).
+
+
 % get_arr_board(+Board, -Res)
 get_arr_board([], []).
 get_arr_board([H|T], Res) :-
@@ -265,29 +291,17 @@ get_arr_board([H|T], Res) :-
 % ========= RESTRICTIONS =========
 % ================================
 
-% abs_coord_diff(+X, +Y, +X1, +Y1, -Res)
-abs_coord_diff(X, Y, X1, Y1, Res) :-
-        Res is abs(X - X1) + abs(Y - Y1).
-
 % sum_adj_trees(+X, +Y, +Board, +Trees)
-sum_adj_trees(_, _, _, []).
+sum_adj_trees(X, Y, Board, Trees) :-
+        close_trees_coords(X, Y, Trees, AdjTrees),
+        adjacent_trees_values(AdjTrees, Board, Values),
+        length(AdjTrees, N), !,
+        sum(Values, #=, N).        
 
-sum_adj_trees(X, Y, Board, [(X1, Y1)|Trees]) :-
-        abs_coord_diff(X, Y, X1, Y1, Res),
-        Res = 2, !,
-        adjacent_trees_values(X, Y, X1, Y1, Board, Values),
-        sum(Values, #>, 1), !,
-        sum_adj_trees(X, Y, Board, Trees).
 
-sum_adj_trees(X, Y, Board, [_|Trees]) :-
-        !, sum_adj_trees(X, Y, Board, Trees).
-        
-        
 % sum_trees(+Trees, +Board, +ConstTrees)
 sum_trees([], _, _):- !.
 sum_trees( [(X, Y) | Trees], Board, ConstTrees ) :-
-        adjacent_values(X, Y, Board, Values),
-        sum( Values, #>, 0 ),
         sum_adj_trees(X, Y, Board, ConstTrees),
         !, sum_trees( Trees, Board, ConstTrees ).
 
@@ -373,6 +387,8 @@ solve_problem(Board, Trees, Vals_Cls, Vals_Lns) :-
       
         labeling_board(Board).
 
+
+
 % ===============================
 % =========== STATISTICS ========
 % ===============================
@@ -381,6 +397,8 @@ resetTime :- statistics(walltime,_).
 currentTime(T) :- statistics(walltime,[_,T]).
 printTime(T):- 	TS is (T*0.001),
 				nl, write('Time: '), write(TS), write('s'), nl, nl.
+
+
 
 % ===============================
 % ============ TENTS ============
@@ -397,6 +415,7 @@ tents:-
         % Display solved puzzle
         display_board(Board, Trees, Vals_Cls, Vals_Lns).
 
+% tents_auto
 tents_auto:-
 		resetTime,
         generate_board(Board, Trees, Vals_Cls, Vals_Lns),
