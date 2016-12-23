@@ -7,10 +7,15 @@
 
 
 %board_info(NCols, NLines, Trees, Vals_Cls, Vals_Lns)
+board_info(4, 3, 
+        [(1, 2), (3, 2), (4, 3)],
+        [],
+        []).
+
 board_info(7, 3, 
         [(1, 1), (3, 1), (6, 1), (2, 2)],
         [],
-        [(1, 3)]).
+        []).
 
 board_info(6, 6, 
         [(2, 1), (4, 2), (2, 3), (4, 4), (6, 4), (1, 5), (2, 5), (4, 6)],               %Trees
@@ -296,7 +301,8 @@ sum_adj_trees(X, Y, Board, Trees) :-
         close_trees_coords(X, Y, Trees, AdjTrees),
         adjacent_trees_values(AdjTrees, Board, Values),
         length(AdjTrees, N), !,
-        sum(Values, #=, N).        
+        N1 is N - 1,
+        sum(Values, #>, N1).        
 
 
 % sum_trees(+Trees, +Board, +ConstTrees)
